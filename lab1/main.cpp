@@ -50,6 +50,7 @@ void main()                                                               \n\
 FragColor = vec4(1.0, 1.0, 0.0, 1.0);					\n\
 }";
 GLuint VAOs[2];
+GLuint shaderPrograms[2];
 
 
 // Shader Functions- click on + to expand
@@ -80,7 +81,7 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
     glAttachShader(ShaderProgram, ShaderObj);
 }
 
-GLuint CompileShaders()
+GLuint CompileShaders(static const char* VS, static const char* FS)
 {
 	//Start the process of setting up our shaders by creating a program ID
 	//Note: we will link all the shaders together into this ID
@@ -91,8 +92,8 @@ GLuint CompileShaders()
     }
 
 	// Create two shader objects, one for the vertex, and one for the fragment shader
-    AddShader(shaderProgramID, pVS, GL_VERTEX_SHADER);
-    AddShader(shaderProgramID, pFS, GL_FRAGMENT_SHADER);
+    AddShader(shaderProgramID, VS, GL_VERTEX_SHADER);
+    AddShader(shaderProgramID, FS, GL_FRAGMENT_SHADER);
 
     GLint Success = 0;
     GLchar ErrorLog[1024] = { 0 };
@@ -166,6 +167,7 @@ void display(){
 	// NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
 	for (int i = 0; i < 2; i++) {
 		glBindVertexArray(VAOs[i]);
+		glUseProgram(shaderPrograms[i]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 	
@@ -176,7 +178,7 @@ void display(){
 void init()
 {
 	glGenVertexArrays(2, VAOs);
-	glBindVertexArray(VAOs[0]);
+	
 	// Create 3 vertices that make up a triangle that fits on the viewport 
 	GLfloat vertices1[] = {-1.0f, -1.0f, 0.0f,
 			0.0f, -1.0f, 0.0f,
@@ -191,18 +193,20 @@ void init()
 	GLfloat colors2[] = {1.0f, 0.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 0.0f, 1.0f};
+	
 	// Set up the shaders
-	GLuint shaderProgramID1 = CompileShaders();
+	glBindVertexArray(VAOs[0]);
+	shaderPrograms[0] = CompileShaders(pVS, pFS);
 	// Put the vertices and colors into a vertex buffer object
 	generateObjectBuffer(vertices1, colors1);
 	// Link the current buffer to the shader
-	linkCurrentBuffertoShader(shaderProgramID1);	
+	linkCurrentBuffertoShader(shaderPrograms[0]);
 
-	GLuint shaderProgramID2 = CompileShaders();
 	glBindVertexArray(VAOs[1]);
-
+	shaderPrograms[1] = CompileShaders(pVS, pFS2);
+	
 	generateObjectBuffer(vertices2, colors2);
-	linkCurrentBuffertoShader(shaderProgramID2);
+	linkCurrentBuffertoShader(shaderPrograms[1]);
 }
 
 int main(int argc, char** argv){
