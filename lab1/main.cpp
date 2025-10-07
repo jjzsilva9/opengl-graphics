@@ -49,8 +49,41 @@ void main()                                                               \n\
 {                                                                          \n\
 FragColor = vec4(1.0, 1.0, 0.0, 1.0);					\n\
 }";
-GLuint VAOs[2];
-GLuint shaderPrograms[2];
+
+static const char* pFS3 = "  \n\
+#version 330 \n\
+                                        \n\
+uniform vec4 uniform_color;                     \n\
+out vec4 FragColor;                     \n\
+										\n\
+void main()								\n\
+{										\n\
+	FragColor = uniform_color;					\n\
+}										\n\
+";
+static const char* pFS4 = "  \n\
+#version 330 \n\
+                                        \n\                     \n\
+out vec4 FragColor;                     \n\
+										\n\
+void main()								\n\
+{										\n\
+	FragColor = vec4((gl_FragCoord.x / 800.0) * 0.5, sin(gl_FragCoord.y / 600.0) * 0.5, 1.0 -(gl_FragCoord.x / 800.0) * 0.75, 1.0);			\n\
+}										\n\
+";
+static const char* pFS5 = "  \n\
+#version 330 \n\
+                                        \n\                     \n\
+out vec4 FragColor;                     \n\
+										\n\
+void main()								\n\
+{										\n\
+	FragColor = vec4(sin(0.1 * (gl_FragCoord.x + gl_FragCoord.y)/2), sin(0.1 * gl_FragCoord.x), sin(0.1 * gl_FragCoord.y), 1.0);			\n\
+}										\n\
+";
+GLuint VAOs[5];
+GLuint shaderPrograms[5];
+float time_counter = 0.0f;
 
 
 // Shader Functions- click on + to expand
@@ -165,27 +198,41 @@ void display(){
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	// NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
-	for (int i = 0; i < 2; i++) {
+	time_counter += 0.1f;
+	for (int i = 0; i < 5; i++) {
 		glBindVertexArray(VAOs[i]);
+		int uniformColorID = glGetUniformLocation(shaderPrograms[i], "uniform_color");
 		glUseProgram(shaderPrograms[i]);
+		glUniform4f(uniformColorID, (sin(time_counter) / 2.0f) + 0.5f, 0.0f, 0.0f, 1.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 	
     glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 
 void init()
 {
-	glGenVertexArrays(2, VAOs);
+	glGenVertexArrays(4, VAOs);
 	
 	// Create 3 vertices that make up a triangle that fits on the viewport 
+	// Order of vertice position is x, y, z
 	GLfloat vertices1[] = {-1.0f, -1.0f, 0.0f,
-			0.0f, -1.0f, 0.0f,
-			-0.5f, 1.0f, 0.0f};
+			-0.5f, -1.0f, 0.0f,
+			-0.75f, -0.5f, 0.0f};
 	GLfloat vertices2[] = {0.0f, -1.0f, 0.0f,
+			0.5f, -1.0f, 0.0f,
+			0.25f, -0.5f, 0.0f};
+	GLfloat vertices3[] = {-0.5f, -1.0f, 0.0f,
+			0.0f, -1.0f, 0.0f,
+			-0.25f, -0.5f, 0.0f};
+	GLfloat vertices4[] = { 0.5f, -1.0f, 0.0f,
 			1.0f, -1.0f, 0.0f,
-			0.5f, 1.0f, 0.0f};
+			0.75f, -0.5f, 0.0f };
+	GLfloat vertices5[] = { 0.5f, -0.5f, 0.0f,
+			1.0f, -0.5f, 0.0f,
+			0.75f, 0.0f, 0.0f };
 	// Create a color array that identfies the colors of each vertex (format R, G, B, A)
 	GLfloat colors1[] = { 0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 0.0f, 1.0f,
@@ -204,9 +251,31 @@ void init()
 
 	glBindVertexArray(VAOs[1]);
 	shaderPrograms[1] = CompileShaders(pVS, pFS2);
-	
+
 	generateObjectBuffer(vertices2, colors2);
+
 	linkCurrentBuffertoShader(shaderPrograms[1]);
+
+	glBindVertexArray(VAOs[2]);
+	shaderPrograms[2] = CompileShaders(pVS, pFS3);
+
+	generateObjectBuffer(vertices3, colors2);
+
+	linkCurrentBuffertoShader(shaderPrograms[2]);
+
+	glBindVertexArray(VAOs[3]);
+	shaderPrograms[3] = CompileShaders(pVS, pFS4);
+
+	generateObjectBuffer(vertices4, colors2);
+
+	linkCurrentBuffertoShader(shaderPrograms[3]);
+
+	glBindVertexArray(VAOs[4]);
+	shaderPrograms[4] = CompileShaders(pVS, pFS5);
+
+	generateObjectBuffer(vertices5, colors2);
+
+	linkCurrentBuffertoShader(shaderPrograms[4]);
 }
 
 int main(int argc, char** argv){
