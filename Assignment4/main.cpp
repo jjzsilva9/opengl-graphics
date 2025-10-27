@@ -1,6 +1,8 @@
 #pragma warning(disable : 5208)
 
 // Windows includes (For Time, IO, etc.)
+#define NOMINMAX
+#include <limits>
 #include <windows.h>
 #include <mmsystem.h>
 #include <iostream>

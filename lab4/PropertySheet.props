@@ -5,11 +5,11 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>include freeglut; include glew-1.10.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jjzsi\source\repos\Computer Graphics\Assignment4\assimp\include;C:\Users\jjzsi\source\repos\Computer Graphics\Assignment4\glew-1.10.0\include;C:\Users\jjzsi\source\repos\Computer Graphics\Assignment4\freeglut\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>freeglut/lib; glew-1.10.0/lib/Release/Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies); freeglut.lib;glew32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies); freeglut.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
