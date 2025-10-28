@@ -34,6 +34,7 @@ MESH TO LOAD
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
+#define CAMERASPEED 10.0f
 #pragma region SimpleTypes
 
 typedef struct
@@ -56,6 +57,18 @@ int height = 600;
 GLuint loc1, loc2, loc3;
 GLfloat rotate_y = 0.0f;
 
+// Root of the Hierarchy
+mat4 view = translate(identity_mat4(), vec3(0.0, 0.0, -10.0f));
+mat4 persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+mat4 model = identity_mat4();
+
+typedef struct
+{
+	vec3 position;
+	// Can be expanded for rotations
+} CameraPosition;
+
+CameraPosition view_delta;
 
 #pragma region MESH LOADING
 /*----------------------------------------------------------------------------
@@ -283,14 +296,6 @@ void display() {
 	int view_mat_location = glGetUniformLocation(shaderProgramID, "view");
 	int proj_mat_location = glGetUniformLocation(shaderProgramID, "proj");
 
-
-	// Root of the Hierarchy
-	mat4 view = identity_mat4();
-	mat4 persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-	mat4 model = identity_mat4();
-	model = rotate_z_deg(model, rotate_y);
-	view = translate(view, vec3(0.0, 0.0, -10.0f));
-
 	// update uniforms & draw
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
@@ -298,17 +303,17 @@ void display() {
 	glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
 
 	// Set up the child matrix
-	mat4 modelChild = identity_mat4();
-	modelChild = rotate_z_deg(modelChild, 180);
-	modelChild = rotate_y_deg(modelChild, rotate_y);
-	modelChild = translate(modelChild, vec3(0.0f, 1.9f, 0.0f));
+	//mat4 modelChild = identity_mat4();
+	//modelChild = rotate_z_deg(modelChild, 180);
+	//modelChild = rotate_y_deg(modelChild, rotate_y);
+	//modelChild = translate(modelChild, vec3(0.0f, 1.9f, 0.0f));
 
-	// Apply the root matrix to the child matrix
-	modelChild = model * modelChild;
+	//// Apply the root matrix to the child matrix
+	//modelChild = model * modelChild;
 
-	// Update the appropriate uniform and draw the mesh again
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, modelChild.m);
-	glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
+	//// Update the appropriate uniform and draw the mesh again
+	//glUniformMatrix4fv(matrix_location, 1, GL_FALSE, modelChild.m);
+	//glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
 
 	glutSwapBuffers();
 }
@@ -323,9 +328,10 @@ void updateScene() {
 	float delta = (curr_time - last_time) * 0.001f;
 	last_time = curr_time;
 
-	// Rotate the model slowly around the y axis at 20 degrees per second
-	rotate_y += 20.0f * delta;
-	rotate_y = fmodf(rotate_y, 360.0f);
+	// Update the vertex shader matrices
+
+	view = translate(view, view_delta.position * delta);
+	view_delta.position = vec3(0.0f, 0.0f, 0.0f);
 
 	// Draw the next frame
 	glutPostRedisplay();
@@ -345,6 +351,25 @@ void init()
 void keypress(unsigned char key, int x, int y) {
 	if (key == 'x') {
 		//Translate the base, etc.
+	}
+	
+	if (key == 'w') {
+		view_delta.position += vec3(0.0f, 0.0f, CAMERASPEED);
+	}
+	if (key == 'a') {
+		view_delta.position += vec3(CAMERASPEED, 0.0f, 0.0f);
+	}
+	if (key == 's') {
+		view_delta.position += vec3(0.0f, 0.0f, -CAMERASPEED);
+	}
+	if (key == 'd') {
+		view_delta.position += vec3(-CAMERASPEED, 0.0f, 0.0f);
+	}
+	if (key == 'e') {
+		view_delta.position += vec3(0.0f, -CAMERASPEED, 0.0f);
+	}
+	if (key == 'q') {
+		view_delta.position += vec3(0.0f, CAMERASPEED, 0.0f);
 	}
 }
 
