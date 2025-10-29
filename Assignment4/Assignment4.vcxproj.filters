@@ -35,4 +35,12 @@
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="griffin.dae">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="griffin.glb">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

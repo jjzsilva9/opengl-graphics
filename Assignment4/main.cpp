@@ -30,7 +30,7 @@ MESH TO LOAD
 ----------------------------------------------------------------------------*/
 // this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
 // put the mesh in your project directory, or provide a filepath for it here
-#define MESH_NAME "monkeyhead_smooth.dae"
+#define MESH_NAME "griffin.obj"
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
@@ -89,7 +89,7 @@ ModelData load_mesh(const char* file_name) {
 	); 
 
 	if (!scene) {
-		fprintf(stderr, "ERROR: reading mesh %s\n", file_name);
+		fprintf(stderr, "ERROR: reading mesh %s\n%s", file_name, aiGetErrorString());
 		return modelData;
 	}
 
@@ -379,7 +379,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
-	glutCreateWindow("Hello Triangle");
+	glutCreateWindow("Project");
 
 	// Tell glut where the display function is
 	glutDisplayFunc(display);
