@@ -30,7 +30,7 @@ MESH TO LOAD
 ----------------------------------------------------------------------------*/
 // this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
 // put the mesh in your project directory, or provide a filepath for it here
-#define MESH_NAME "griffin.obj"
+#define MESH_NAME "monkeyhead_smooth.dae"
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
@@ -45,6 +45,14 @@ typedef struct
 	std::vector<vec2> mTextureCoords;
 } ModelData;
 #pragma endregion SimpleTypes
+
+typedef struct
+{
+	vec3 position = vec3(0.0f, 0.0f, 0.0f);
+	vec3 direction = vec3(0.0f, 0.0f, -1.0f);
+	vec3 up = vec3(0.0f, 1.0f, 0.0f);
+} Camera;
+Camera camera;
 
 using namespace std;
 GLuint shaderProgramID;
@@ -62,13 +70,11 @@ mat4 view = translate(identity_mat4(), vec3(0.0, 0.0, -10.0f));
 mat4 persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 mat4 model = identity_mat4();
 
-typedef struct
-{
-	vec3 position;
-	// Can be expanded for rotations
-} CameraPosition;
-
-CameraPosition view_delta;
+float delta;
+float yaw, pitch;
+int lastX = width / 2;
+int lastY = height / 2;
+bool firstMouse = true;
 
 #pragma region MESH LOADING
 /*----------------------------------------------------------------------------
@@ -239,7 +245,7 @@ void generateObjectBufferMesh() {
 	/*----------------------------------------------------------------------------
 	LOAD MESH HERE AND COPY INTO BUFFERS
 	----------------------------------------------------------------------------*/
-
+	
 	//Note: you may get an error "vector subscript out of range" if you are using this code for a mesh that doesnt have positions and normals
 	//Might be an idea to do a check for that before generating and binding the buffer.
 
@@ -325,13 +331,10 @@ void updateScene() {
 	DWORD curr_time = timeGetTime();
 	if (last_time == 0)
 		last_time = curr_time;
-	float delta = (curr_time - last_time) * 0.001f;
+	delta = (curr_time - last_time) * 0.001f;
 	last_time = curr_time;
 
-	// Update the vertex shader matrices
-
-	view = translate(view, view_delta.position * delta);
-	view_delta.position = vec3(0.0f, 0.0f, 0.0f);
+	view = look_at(camera.position, camera.position + camera.direction, camera.up);
 
 	// Draw the next frame
 	glutPostRedisplay();
@@ -354,23 +357,76 @@ void keypress(unsigned char key, int x, int y) {
 	}
 	
 	if (key == 'w') {
-		view_delta.position += vec3(0.0f, 0.0f, CAMERASPEED);
+		camera.position += camera.direction * CAMERASPEED * delta;
 	}
 	if (key == 'a') {
-		view_delta.position += vec3(CAMERASPEED, 0.0f, 0.0f);
+		camera.position -= normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
 	}
 	if (key == 's') {
-		view_delta.position += vec3(0.0f, 0.0f, -CAMERASPEED);
+		camera.position -= camera.direction * CAMERASPEED * delta;
 	}
 	if (key == 'd') {
-		view_delta.position += vec3(-CAMERASPEED, 0.0f, 0.0f);
+		camera.position += normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
 	}
 	if (key == 'e') {
-		view_delta.position += vec3(0.0f, -CAMERASPEED, 0.0f);
+		camera.position += camera.up * CAMERASPEED * delta;
 	}
 	if (key == 'q') {
-		view_delta.position += vec3(0.0f, CAMERASPEED, 0.0f);
+		camera.position -= camera.up * CAMERASPEED * delta;
 	}
+	if (key == 'm') {
+		model =  scale(model, vec3(1.5f, 1.5f, 1.5f));
+	}
+	if (key == 'n') {
+		model = scale(model, vec3(0.75f, 0.75f, 0.75f));
+	}
+}
+
+void mouse(int x, int y) {
+	//std::cout << "Mouse moved to: " << x << ", " << y << std::endl;
+	if (firstMouse) {
+		lastX = x;
+		lastY = y;
+		firstMouse = false;
+	}
+	
+	float xoffset = x - lastX;
+	float yoffset = lastY - y;
+
+	lastX = x;
+	lastY = y;
+
+	yaw += xoffset * 0.1f;
+	pitch += yoffset * 0.1f;
+
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	if (pitch < -89.0f) {
+		pitch = -89.0f;
+	}
+	vec3 viewDirection;
+	viewDirection.v[0] = cos(radian(yaw)) * cos(radian(pitch));
+	viewDirection.v[1] = sin(radian(pitch));
+	viewDirection.v[2] = sin(radian(yaw)) * cos(radian(pitch));
+	camera.direction = normalise(viewDirection);
+
+	if ((x < width / 100) || (x > 99 * width / 100) || (y < height / 100) || (y > 99 * height / 100)) {
+		glutWarpPointer(width / 2, height / 2);
+		lastX = width / 2;
+		lastY = height / 2;
+	}
+}
+
+//void mouseEnter(int state) {
+//	firstMouse = true;
+//	glutWarpPointer(width / 2, height / 2);
+//}
+
+void reshape(int x, int y) {
+	width = x;
+	height = y;
+	persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 }
 
 int main(int argc, char** argv) {
@@ -385,6 +441,9 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutIdleFunc(updateScene);
 	glutKeyboardFunc(keypress);
+	//glutSetCursor(GLUT_CURSOR_NONE);
+	glutPassiveMotionFunc(mouse);
+	glutReshapeFunc(reshape);
 
 	// A call to glewInit() must be done after glut is initialized!
 	GLenum res = glewInit();

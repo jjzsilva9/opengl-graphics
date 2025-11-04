@@ -101,6 +101,7 @@ void print (const vec3& v);
 void print (const vec4& v);
 void print (const mat3& m);
 void print (const mat4& m);
+float radian(float deg);
 // vector functions
 float length (const vec3& v);
 float length2 (const vec3& v);
@@ -125,6 +126,7 @@ mat4 rotate_y_deg (const mat4& m, float deg);
 mat4 rotate_z_deg (const mat4& m, float deg);
 mat4 scale (const mat4& m, const vec3& v);
 // camera functions
+mat4 rotate_about_point(mat4 m, vec3 point, float pitch, float yaw);
 mat4 look_at (const vec3& cam_pos, vec3 targ_pos, const vec3& up);
 mat4 perspective (float fovy, float aspect, float near, float far);
 // quaternion functions

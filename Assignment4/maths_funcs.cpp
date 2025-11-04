@@ -126,6 +126,10 @@ void print (const mat4& m) {
 	printf ("[%.2f][%.2f][%.2f][%.2f]\n", m.m[3], m.m[7], m.m[11], m.m[15]);
 }
 
+float radian(float deg) {
+	return deg * (float)ONE_DEG_IN_RAD;
+}
+
 /*---------------------------------VECTOR FUNCTIONS-----------------------------------*/
 
 float length (const vec3& v) {
@@ -496,6 +500,26 @@ mat4 look_at (const vec3& cam_pos, vec3 targ_pos, const vec3& up) {
 	ori.m[10] = -f.v[2];
 	
 	return ori * p;//p * ori;
+}
+
+mat4 rotate_about_point(mat4 m, vec3 point, float pitch, float yaw) {
+	float rad_pitch = pitch * (float)ONE_DEG_IN_RAD;
+	mat4 m_p = identity_mat4();
+	m_p.m[5] = cosf(rad_pitch);
+	m_p.m[9] = -sinf(rad_pitch);
+	m_p.m[6] = sinf(rad_pitch);
+	m_p.m[10] = cosf(rad_pitch);
+	float rad_yaw = yaw * (float)ONE_DEG_IN_RAD;
+	mat4 m_y = identity_mat4();
+	m_y.m[0] = cosf(rad_yaw);
+	m_y.m[8] = sinf(rad_yaw);
+	m_y.m[2] = -sinf(rad_yaw);
+	m_y.m[10] = cosf(rad_yaw);
+	mat4 m_t = identity_mat4();
+	m_t.m[12] = point.v[0];
+	m_t.m[13] = point.v[1];
+	m_t.m[14] = point.v[2];
+	return inverse(m_t) * m_y * m_p * m_t * m;
 }
 
 /*
