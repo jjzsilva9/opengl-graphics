@@ -22,6 +22,7 @@
 
 // Project includes
 #include "maths_funcs.h"
+#include "PerlinNoise.h"
 
 
 
@@ -59,6 +60,8 @@ GLuint shaderProgramID;
 
 ModelData mesh_data;
 unsigned int mesh_vao = 0;
+ModelData terrain_data;
+unsigned int terrain_vao = 0;
 int width = 800;
 int height = 600;
 
@@ -241,7 +244,7 @@ GLuint CompileShaders()
 
 // VBO Functions - click on + to expand
 #pragma region VBO_FUNCTIONS
-void generateObjectBufferMesh() {
+void generateObjectBufferMesh(ModelData mesh) {
 	/*----------------------------------------------------------------------------
 	LOAD MESH HERE AND COPY INTO BUFFERS
 	----------------------------------------------------------------------------*/
@@ -249,7 +252,7 @@ void generateObjectBufferMesh() {
 	//Note: you may get an error "vector subscript out of range" if you are using this code for a mesh that doesnt have positions and normals
 	//Might be an idea to do a check for that before generating and binding the buffer.
 
-	mesh_data = load_mesh(MESH_NAME);
+	
 	unsigned int vp_vbo = 0;
 	loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
 	loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
@@ -257,11 +260,14 @@ void generateObjectBufferMesh() {
 
 	glGenBuffers(1, &vp_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh_data.mPointCount * sizeof(vec3), &mesh_data.mVertices[0], GL_STATIC_DRAW);
-	unsigned int vn_vbo = 0;
-	glGenBuffers(1, &vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh_data.mPointCount * sizeof(vec3), &mesh_data.mNormals[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mesh.mPointCount * sizeof(vec3), &mesh.mVertices[0], GL_STATIC_DRAW);
+	unsigned int vn_vbo;
+	if (mesh.mNormals.size() > 0) {
+		vn_vbo = 0;
+		glGenBuffers(1, &vn_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
+		glBufferData(GL_ARRAY_BUFFER, mesh.mPointCount * sizeof(vec3), &mesh.mNormals[0], GL_STATIC_DRAW);
+	}
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	unsigned int vt_vbo = 0;
@@ -275,9 +281,11 @@ void generateObjectBufferMesh() {
 	glEnableVertexAttribArray(loc1);
 	glBindBuffer(GL_ARRAY_BUFFER, vp_vbo);
 	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	if (mesh.mNormals.size() > 0) {
+		glEnableVertexAttribArray(loc2);
+		glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
+		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	}
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	glEnableVertexAttribArray (loc3);
@@ -285,6 +293,109 @@ void generateObjectBufferMesh() {
 	//	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 }
 #pragma endregion VBO_FUNCTIONS
+
+
+#pragma region INPUT_FUNCTIONS
+
+// Placeholder code for the keypress
+void keypress(unsigned char key, int x, int y) {
+	if (key == 'x') {
+		//Translate the base, etc.
+	}
+
+	if (key == 'w') {
+		camera.position += camera.direction * CAMERASPEED * delta;
+	}
+	if (key == 'a') {
+		camera.position -= normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
+	}
+	if (key == 's') {
+		camera.position -= camera.direction * CAMERASPEED * delta;
+	}
+	if (key == 'd') {
+		camera.position += normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
+	}
+	if (key == 'e') {
+		camera.position += camera.up * CAMERASPEED * delta;
+	}
+	if (key == 'q') {
+		camera.position -= camera.up * CAMERASPEED * delta;
+	}
+	if (key == 'm') {
+		model = scale(model, vec3(1.5f, 1.5f, 1.5f));
+	}
+	if (key == 'n') {
+		model = scale(model, vec3(0.75f, 0.75f, 0.75f));
+	}
+}
+
+
+
+void mouse(int x, int y) {
+	//std::cout << "Mouse moved to: " << x << ", " << y << std::endl;
+	if (firstMouse) {
+		lastX = x;
+		lastY = y;
+		firstMouse = false;
+	}
+
+	float xoffset = x - lastX;
+	float yoffset = lastY - y;
+
+	lastX = x;
+	lastY = y;
+
+	yaw += xoffset * 0.1f;
+	pitch += yoffset * 0.1f;
+
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	if (pitch < -89.0f) {
+		pitch = -89.0f;
+	}
+	vec3 viewDirection;
+	viewDirection.v[0] = cos(radian(yaw)) * cos(radian(pitch));
+	viewDirection.v[1] = sin(radian(pitch));
+	viewDirection.v[2] = sin(radian(yaw)) * cos(radian(pitch));
+	camera.direction = normalise(viewDirection);
+
+	if ((x < width / 100) || (x > 99 * width / 100) || (y < height / 100) || (y > 99 * height / 100)) {
+		glutWarpPointer(width / 2, height / 2);
+		lastX = width / 2;
+		lastY = height / 2;
+	}
+}
+
+//void mouseEnter(int state) {
+//	firstMouse = true;
+//	glutWarpPointer(width / 2, height / 2);
+//}
+
+void reshape(int x, int y) {
+	width = x;
+	height = y;
+	persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+}
+
+#pragma endregion INPUT_FUNCTIONS
+
+#pragma region TERRAIN
+
+
+ModelData generateTerrain(int gridSize) {
+	ModelData terrain;
+	PerlinNoise p = PerlinNoise();
+
+	for (int x = 0; x < gridSize; x++) {
+		for (int z = 0; z < gridSize; z++) {
+			terrain.mVertices.push_back(vec3(x, p.noise(x, 1, z), z));
+			terrain.mPointCount++;
+		}
+	}
+	return terrain;
+}
+#pragma endregion TERRAIN
 
 
 void display() {
@@ -307,6 +418,10 @@ void display() {
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
 	glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
+
+	//glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
+
+	//glDrawArrays(GL_TRIANGLES, 0, terrain_data.mPointCount);
 
 	// Set up the child matrix
 	//mat4 modelChild = identity_mat4();
@@ -346,88 +461,15 @@ void init()
 	// Set up the shaders
 	GLuint shaderProgramID = CompileShaders();
 	// load mesh into a vertex buffer array
-	generateObjectBufferMesh();
+	mesh_data = load_mesh(MESH_NAME);
+	generateObjectBufferMesh(mesh_data);
+
+	/*terrain_data = generateTerrain(1000);
+	generateObjectBufferMesh(terrain_data);*/
 
 }
 
-// Placeholder code for the keypress
-void keypress(unsigned char key, int x, int y) {
-	if (key == 'x') {
-		//Translate the base, etc.
-	}
-	
-	if (key == 'w') {
-		camera.position += camera.direction * CAMERASPEED * delta;
-	}
-	if (key == 'a') {
-		camera.position -= normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
-	}
-	if (key == 's') {
-		camera.position -= camera.direction * CAMERASPEED * delta;
-	}
-	if (key == 'd') {
-		camera.position += normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
-	}
-	if (key == 'e') {
-		camera.position += camera.up * CAMERASPEED * delta;
-	}
-	if (key == 'q') {
-		camera.position -= camera.up * CAMERASPEED * delta;
-	}
-	if (key == 'm') {
-		model =  scale(model, vec3(1.5f, 1.5f, 1.5f));
-	}
-	if (key == 'n') {
-		model = scale(model, vec3(0.75f, 0.75f, 0.75f));
-	}
-}
 
-void mouse(int x, int y) {
-	//std::cout << "Mouse moved to: " << x << ", " << y << std::endl;
-	if (firstMouse) {
-		lastX = x;
-		lastY = y;
-		firstMouse = false;
-	}
-	
-	float xoffset = x - lastX;
-	float yoffset = lastY - y;
-
-	lastX = x;
-	lastY = y;
-
-	yaw += xoffset * 0.1f;
-	pitch += yoffset * 0.1f;
-
-	if (pitch > 89.0f) {
-		pitch = 89.0f;
-	}
-	if (pitch < -89.0f) {
-		pitch = -89.0f;
-	}
-	vec3 viewDirection;
-	viewDirection.v[0] = cos(radian(yaw)) * cos(radian(pitch));
-	viewDirection.v[1] = sin(radian(pitch));
-	viewDirection.v[2] = sin(radian(yaw)) * cos(radian(pitch));
-	camera.direction = normalise(viewDirection);
-
-	if ((x < width / 100) || (x > 99 * width / 100) || (y < height / 100) || (y > 99 * height / 100)) {
-		glutWarpPointer(width / 2, height / 2);
-		lastX = width / 2;
-		lastY = height / 2;
-	}
-}
-
-//void mouseEnter(int state) {
-//	firstMouse = true;
-//	glutWarpPointer(width / 2, height / 2);
-//}
-
-void reshape(int x, int y) {
-	width = x;
-	height = y;
-	persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-}
 
 int main(int argc, char** argv) {
 
