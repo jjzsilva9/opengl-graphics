@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="maths_funcs.h" />
     <ClInclude Include="PerlinNoise.h" />
+    <ClInclude Include="shader.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="simpleFragmentShader.txt">

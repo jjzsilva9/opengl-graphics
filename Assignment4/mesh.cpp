@@ -16,7 +16,7 @@
 
 // Project includes
 #include "maths_funcs.h"
-#include "PerlinNoise.h"
+#include "shader.h"
 
 struct Vertex {
 	vec3 Position;
@@ -35,11 +35,11 @@ class Mesh {
         std::vector<unsigned int> indices;
         std::vector<Texture>      textures;
 
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Shader shader) {
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, GLuint shaderProgramID) {
             this->vertices = vertices;
             this->indices = indices;
             this->textures = textures;
-			this->shader = shader;
+			this->shaderProgramID = shaderProgramID;
             setupMesh();
         }
 
@@ -48,13 +48,13 @@ class Mesh {
         }
     private:
         unsigned int VAO, VBO, EBO;
-		Shader shader;
+		GLuint shaderProgramID;
 
         void setupMesh() {
 
-			GLuint loc1 = glGetAttribLocation(shader->shaderProgramID, "vertex_position");
-			GLuint loc2 = glGetAttribLocation(shader->shaderProgramID, "vertex_normal");
-			GLuint loc3 = glGetAttribLocation(shader->shaderProgramID, "vertex_texture");
+			GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
+			GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
+			GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
 
 			// Vertices
 			glGenBuffers(1, &VBO);
