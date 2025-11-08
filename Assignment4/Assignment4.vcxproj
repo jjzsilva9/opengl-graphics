@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths_funcs.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
