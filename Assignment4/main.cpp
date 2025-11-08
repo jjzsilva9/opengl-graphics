@@ -31,7 +31,7 @@ MESH TO LOAD
 ----------------------------------------------------------------------------*/
 // this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
 // put the mesh in your project directory, or provide a filepath for it here
-#define MESH_NAME "monkeyhead_smooth.dae"
+#define MESH_NAME "snowymountain.obj"
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
@@ -262,12 +262,11 @@ void generateObjectBufferMesh(ModelData mesh) {
 	glBindBuffer(GL_ARRAY_BUFFER, vp_vbo);
 	glBufferData(GL_ARRAY_BUFFER, mesh.mPointCount * sizeof(vec3), &mesh.mVertices[0], GL_STATIC_DRAW);
 	unsigned int vn_vbo;
-	if (mesh.mNormals.size() > 0) {
-		vn_vbo = 0;
-		glGenBuffers(1, &vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, mesh.mPointCount * sizeof(vec3), &mesh.mNormals[0], GL_STATIC_DRAW);
-	}
+	vn_vbo = 0;
+	glGenBuffers(1, &vn_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
+	glBufferData(GL_ARRAY_BUFFER, mesh.mPointCount * sizeof(vec3), &mesh.mNormals[0], GL_STATIC_DRAW);
+	
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	unsigned int vt_vbo = 0;
@@ -281,11 +280,11 @@ void generateObjectBufferMesh(ModelData mesh) {
 	glEnableVertexAttribArray(loc1);
 	glBindBuffer(GL_ARRAY_BUFFER, vp_vbo);
 	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	if (mesh.mNormals.size() > 0) {
-		glEnableVertexAttribArray(loc2);
-		glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
-		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	}
+
+	glEnableVertexAttribArray(loc2);
+	glBindBuffer(GL_ARRAY_BUFFER, vn_vbo);
+	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	glEnableVertexAttribArray (loc3);
@@ -480,6 +479,7 @@ int main(int argc, char** argv) {
 	glutCreateWindow("Project");
 
 	// Tell glut where the display function is
+	//glDisable(GL_CULL_FACE);
 	glutDisplayFunc(display);
 	glutIdleFunc(updateScene);
 	glutKeyboardFunc(keypress);
