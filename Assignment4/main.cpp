@@ -1,51 +1,40 @@
 #pragma warning(disable : 5208)
 
-// Windows includes (For Time, IO, etc.)
-#define NOMINMAX
+// Standard library includes
+#include <string>
+#include <vector>
+#include <iostream>
 #include <limits>
+#include <math.h>
+
+namespace std {
+    using ::sqrt;
+    using ::sin;
+    using ::acos;
+}
+
+// Windows specific
+#define NOMINMAX
 #include <windows.h>
 #include <mmsystem.h>
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <math.h>
-#include <vector> // STL dynamic memory.
 
-// OpenGL includes
+// OpenGL
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-// Assimp includes
-#include <assimp/cimport.h> // scene importer
-#include <assimp/scene.h> // collects data
-#include <assimp/postprocess.h> // various extra operations
+// Assimp
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 // Project includes
 #include "maths_funcs.h"
+#include "shader.h"
+#include "model.h"
 #include "PerlinNoise.h"
 
-
-
-/*----------------------------------------------------------------------------
-MESH TO LOAD
-----------------------------------------------------------------------------*/
-// this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
-// put the mesh in your project directory, or provide a filepath for it here
-#define MESH_NAME "snowymountain.obj"
-/*----------------------------------------------------------------------------
-----------------------------------------------------------------------------*/
-
 #define CAMERASPEED 10.0f
-#pragma region SimpleTypes
 
-typedef struct
-{
-	size_t mPointCount = 0;
-	std::vector<vec3> mVertices;
-	std::vector<vec3> mNormals;
-	std::vector<vec2> mTextureCoords;
-} ModelData;
-#pragma endregion SimpleTypes
 
 typedef struct
 {
@@ -56,17 +45,9 @@ typedef struct
 Camera camera;
 
 using namespace std;
-GLuint shaderProgramID;
 
-ModelData mesh_data;
-unsigned int mesh_vao = 0;
-ModelData terrain_data;
-unsigned int terrain_vao = 0;
 int width = 800;
 int height = 600;
-
-GLuint loc1, loc2, loc3;
-GLfloat rotate_y = 0.0f;
 
 // Root of the Hierarchy
 mat4 view = translate(identity_mat4(), vec3(0.0, 0.0, -10.0f));
@@ -79,65 +60,9 @@ int lastX = width / 2;
 int lastY = height / 2;
 bool firstMouse = true;
 
-#pragma region MESH LOADING
-/*----------------------------------------------------------------------------
-MESH LOADING FUNCTION
-----------------------------------------------------------------------------*/
-
-ModelData load_mesh(const char* file_name) {
-	ModelData modelData;
-
-	/* Use assimp to read the model file, forcing it to be read as    */
-	/* triangles. The second flag (aiProcess_PreTransformVertices) is */
-	/* relevant if there are multiple meshes in the model file that   */
-	/* are offset from the origin. This is pre-transform them so      */
-	/* they're in the right position.                                 */
-	const aiScene* scene = aiImportFile(
-		file_name, 
-		aiProcess_Triangulate | aiProcess_PreTransformVertices
-	); 
-
-	if (!scene) {
-		fprintf(stderr, "ERROR: reading mesh %s\n%s", file_name, aiGetErrorString());
-		return modelData;
-	}
-
-	printf("  %i materials\n", scene->mNumMaterials);
-	printf("  %i meshes\n", scene->mNumMeshes);
-	printf("  %i textures\n", scene->mNumTextures);
-
-	for (unsigned int m_i = 0; m_i < scene->mNumMeshes; m_i++) {
-		const aiMesh* mesh = scene->mMeshes[m_i];
-		printf("    %i vertices in mesh\n", mesh->mNumVertices);
-		modelData.mPointCount += mesh->mNumVertices;
-		for (unsigned int v_i = 0; v_i < mesh->mNumVertices; v_i++) {
-			if (mesh->HasPositions()) {
-				const aiVector3D* vp = &(mesh->mVertices[v_i]);
-				modelData.mVertices.push_back(vec3(vp->x, vp->y, vp->z));
-			}
-			if (mesh->HasNormals()) {
-				const aiVector3D* vn = &(mesh->mNormals[v_i]);
-				modelData.mNormals.push_back(vec3(vn->x, vn->y, vn->z));
-			}
-			if (mesh->HasTextureCoords(0)) {
-				const aiVector3D* vt = &(mesh->mTextureCoords[0][v_i]);
-				modelData.mTextureCoords.push_back(vec2(vt->x, vt->y));
-			}
-			if (mesh->HasTangentsAndBitangents()) {
-				/* You can extract tangents and bitangents here              */
-				/* Note that you might need to make Assimp generate this     */
-				/* data for you. Take a look at the flags that aiImportFile  */
-				/* can take.                                                 */
-			}
-		}
-	}
-
-	aiReleaseImport(scene);
-	return modelData;
-}
-
-#pragma endregion MESH LOADING
-
+Shader* shader = nullptr;
+Model* terrain = nullptr;
+Model* griffins = nullptr;
 
 #pragma region INPUT_FUNCTIONS
 
@@ -226,19 +151,19 @@ void reshape(int x, int y) {
 
 #pragma region TERRAIN
 
-
-ModelData generateTerrain(int gridSize) {
-	ModelData terrain;
-	PerlinNoise p = PerlinNoise();
-
-	for (int x = 0; x < gridSize; x++) {
-		for (int z = 0; z < gridSize; z++) {
-			terrain.mVertices.push_back(vec3(x, p.noise(x, 1, z), z));
-			terrain.mPointCount++;
-		}
-	}
-	return terrain;
-}
+// Placeholder for procedural terrain for final deliverable
+//ModelData generateTerrain(int gridSize) {
+//	ModelData terrain;
+//	PerlinNoise p = PerlinNoise();
+//
+//	for (int x = 0; x < gridSize; x++) {
+//		for (int z = 0; z < gridSize; z++) {
+//			terrain.mVertices.push_back(vec3(x, p.noise(x, 1, z), z));
+//			terrain.mPointCount++;
+//		}
+//	}
+//	return terrain;
+//}
 #pragma endregion TERRAIN
 
 
@@ -249,37 +174,22 @@ void display() {
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(shaderProgramID);
 
+	shader->use();
 
 	//Declare your uniform variables that will be used in your shader
-	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
-	int view_mat_location = glGetUniformLocation(shaderProgramID, "view");
-	int proj_mat_location = glGetUniformLocation(shaderProgramID, "proj");
+	int matrix_location = glGetUniformLocation(shader->ID, "model");
+	int view_mat_location = glGetUniformLocation(shader->ID, "view");
+	int proj_mat_location = glGetUniformLocation(shader->ID, "proj");
 
 	// update uniforms & draw
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
-	glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
 
-	//glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
-
-	//glDrawArrays(GL_TRIANGLES, 0, terrain_data.mPointCount);
-
-	// Set up the child matrix
-	//mat4 modelChild = identity_mat4();
-	//modelChild = rotate_z_deg(modelChild, 180);
-	//modelChild = rotate_y_deg(modelChild, rotate_y);
-	//modelChild = translate(modelChild, vec3(0.0f, 1.9f, 0.0f));
-
-	//// Apply the root matrix to the child matrix
-	//modelChild = model * modelChild;
-
-	//// Update the appropriate uniform and draw the mesh again
-	//glUniformMatrix4fv(matrix_location, 1, GL_FALSE, modelChild.m);
-	//glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
-
+	//terrain->Draw(*shader);
+	
+	griffins->Draw(*shader);
 	glutSwapBuffers();
 }
 
@@ -302,15 +212,9 @@ void updateScene() {
 
 void init()
 {
-	// Set up the shaders
-	GLuint shaderProgramID = CompileShaders();
-	// load mesh into a vertex buffer array
-	mesh_data = load_mesh(MESH_NAME);
-	generateObjectBufferMesh(mesh_data);
-
-	/*terrain_data = generateTerrain(1000);
-	generateObjectBufferMesh(terrain_data);*/
-
+	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
+	//terrain = new Model("snowymountain.obj", shader->ID);
+	griffins = new Model("griffin.obj", shader->ID);
 }
 
 

@@ -1,77 +1,65 @@
-#pragma warning(disable : 5208)
+#include "mesh.h"
 
+// Standard library
 #include <string>
-#include <stdio.h>
+#include <vector>
 #include <math.h>
-#include <vector> // STL dynamic memory.
 
-// OpenGL includes
+namespace std {
+    using ::sqrt;
+    using ::sin;
+    using ::acos;
+}
+
+// OpenGL
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+
+// Project includes
+#include "shader.h"
 
 // Assimp includes
 #include <assimp/cimport.h> // scene importer
 #include <assimp/scene.h> // collects data
 #include <assimp/postprocess.h> // various extra operations
 
-// Project includes
-#include "maths_funcs.h"
-#include "shader.h"
+using namespace std;
 
-struct Vertex {
-	vec3 Position;
-	vec3 Normal;
-	vec2 TextureCoords;
-};
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, GLuint shaderProgramID) {
+    this->vertices = vertices;
+    this->indices = indices;
+    this->textures = textures;
+	this->shaderProgramID = shaderProgramID;
+    setupMesh();
+}
 
-struct Texture {
-	unsigned int id;
-	std::string type;
-};
+void Mesh::Draw() {
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glBindVertexArray(0);
+}
+    
+void Mesh::setupMesh() {
 
-class Mesh {
-    public:
-        std::vector<Vertex>       vertices;
-        std::vector<unsigned int> indices;
-        std::vector<Texture>      textures;
+	GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
+	GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
+	GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
 
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, GLuint shaderProgramID) {
-            this->vertices = vertices;
-            this->indices = indices;
-            this->textures = textures;
-			this->shaderProgramID = shaderProgramID;
-            setupMesh();
-        }
+	// Vertices
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &VAO);
 
-        void Draw(Shader& shader) {
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-        }
-    private:
-        unsigned int VAO, VBO, EBO;
-		GLuint shaderProgramID;
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-        void setupMesh() {
+	glEnableVertexAttribArray(loc1);
+	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
 
-			GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
-			GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
-			GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
+	glEnableVertexAttribArray(loc2);
+	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
 
-			// Vertices
-			glGenBuffers(1, &VBO);
-			glGenBuffers(1, &VAO);
-
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-			glEnableVertexAttribArray(loc1);
-			glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
-
-			glEnableVertexAttribArray(loc2);
-			glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-
-			glEnableVertexAttribArray (loc3);
-			glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoords));
-        }
-};
+	glEnableVertexAttribArray (loc3);
+	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoords));
+}

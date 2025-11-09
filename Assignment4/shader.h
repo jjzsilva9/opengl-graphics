@@ -1,3 +1,6 @@
+#ifndef SHADER_H
+#define SHADER_H
+
 #include <windows.h>
 #include <mmsystem.h>
 #include <iostream>
@@ -20,7 +23,7 @@
 
 class Shader {
 public:
-	unsigned int ID;
+	GLuint ID;
 	
 	Shader(const char* vertexPath, const char* fragmentPath) {
 		//Start the process of setting up our shaders by creating a program ID
@@ -135,3 +138,5 @@ private:
 		glAttachShader(ShaderProgram, ShaderObj);
 	}
 };
+
+#endif
