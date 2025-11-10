@@ -47,16 +47,20 @@ void Model::loadModel(const char* file_name) {
 		return;
 	}
 	processNode(scene->mRootNode, scene);
+
+	aiReleaseImport(scene);
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
 		
 	for (unsigned int m_i = 0; m_i < node->mNumMeshes; m_i++) {
+		std::cout << "Mesh number 1" << "\n";
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[m_i]];
 		meshes.push_back(processMesh(mesh, scene));
 	}
 
 	for (int i = 0; i < node->mNumChildren; i++) {
+		std::cout << "Node number 1" << "\n";
 		processNode(node->mChildren[i], scene);
 	}
 }
@@ -91,11 +95,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	for (unsigned int i_i = 0; i_i < mesh->mNumFaces; i_i++) {
+		
 		aiFace face = mesh->mFaces[i_i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++) {
 			indices.push_back(face.mIndices[j]);
 		}
 	}
+	std::cout << "Faces done" << "\n";
 
 	return Mesh(vertices, indices, textures, shaderProgramID);
 }

@@ -187,7 +187,7 @@ void display() {
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
 
-	//terrain->Draw(*shader);
+	terrain->Draw(*shader);
 	
 	griffins->Draw(*shader);
 	glutSwapBuffers();
@@ -213,8 +213,9 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
-	//terrain = new Model("snowymountain.obj", shader->ID);
+	terrain = new Model("snowymountain.obj", shader->ID);
 	griffins = new Model("griffin.obj", shader->ID);
+	
 }
 
 

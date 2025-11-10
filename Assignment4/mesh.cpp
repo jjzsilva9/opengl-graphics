@@ -41,19 +41,19 @@ void Mesh::Draw() {
     
 void Mesh::setupMesh() {
 
-	GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
-	GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
-	GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
-
-	// Vertices
+	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &VAO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
+	GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
+	GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
+	GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
+
+	
 	glEnableVertexAttribArray(loc1);
 	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
 
@@ -62,4 +62,7 @@ void Mesh::setupMesh() {
 
 	glEnableVertexAttribArray (loc3);
 	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoords));
+
+	glBindVertexArray(0);
+	std::cout << "Mesh setup" << "\n";
 }
