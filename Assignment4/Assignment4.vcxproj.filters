@@ -30,6 +30,9 @@
     <ClCompile Include="model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="griffin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="maths_funcs.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="griffin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

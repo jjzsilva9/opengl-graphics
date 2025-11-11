@@ -24,15 +24,29 @@ namespace std {
 
 using namespace std;
 
-Model::Model(const char* path, GLuint shaderProgramID) {
+Model::Model(const char* path, vec3 position, GLuint shaderProgramID) {
 	this->shaderProgramID = shaderProgramID;
+	this->model = identity_mat4();
+	this->model.m[12] = position.v[0];
+	this->model.m[13] = position.v[1];
+	this->model.m[14] = position.v[2];
 	loadModel(path);
 }
 
-void Model::Draw(Shader& shader) {
+void Model::Draw() {
 	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i].Draw();
+		meshes[i].Draw(model);
 	}
+}
+
+void Model::translate(vec3 offset) {
+	model = ::translate(model, offset);
+}
+
+void Model::rotate(vec3 offset) {
+	model = rotate_x_deg(model, offset.v[0]);
+	model = rotate_y_deg(model, offset.v[1]);
+	model = rotate_z_deg(model, offset.v[2]);
 }
 
 void Model::loadModel(const char* file_name) {
@@ -54,13 +68,13 @@ void Model::loadModel(const char* file_name) {
 void Model::processNode(aiNode* node, const aiScene* scene) {
 		
 	for (unsigned int m_i = 0; m_i < node->mNumMeshes; m_i++) {
-		std::cout << "Mesh number 1" << "\n";
+		std::cout << "Mesh number 1" << std::endl;
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[m_i]];
 		meshes.push_back(processMesh(mesh, scene));
 	}
 
 	for (int i = 0; i < node->mNumChildren; i++) {
-		std::cout << "Node number 1" << "\n";
+		std::cout << "Node" << node->mName.C_Str() << std::endl;
 		processNode(node->mChildren[i], scene);
 	}
 }

@@ -22,13 +22,18 @@ typedef unsigned int GLuint;
 
 class Model {
 public:
-	Model(const char* path, GLuint shaderProgramID);
-	void Draw(Shader& shader);
+	mat4 model;
+
+	Model(const char* path, vec3 position, GLuint shaderProgramID);
+	void Draw();
+	void translate(vec3 offset);
+	void rotate(vec3 offset);
 
 private:
 	std::vector<Mesh> meshes;
 	std::string directory;
 	GLuint shaderProgramID;
+	
 
 	void loadModel(const char* file_name);
 	void processNode(aiNode* node, const aiScene* scene);

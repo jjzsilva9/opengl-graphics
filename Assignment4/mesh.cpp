@@ -33,7 +33,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     setupMesh();
 }
 
-void Mesh::Draw() {
+void Mesh::Draw(mat4 model) {
+	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
+	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 	glBindVertexArray(0);

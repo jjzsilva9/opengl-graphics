@@ -31,6 +31,7 @@ namespace std {
 #include "maths_funcs.h"
 #include "shader.h"
 #include "model.h"
+#include "griffin.h"
 #include "PerlinNoise.h"
 
 #define CAMERASPEED 10.0f
@@ -52,7 +53,6 @@ int height = 600;
 // Root of the Hierarchy
 mat4 view = translate(identity_mat4(), vec3(0.0, 0.0, -10.0f));
 mat4 persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-mat4 model = identity_mat4();
 
 float delta;
 float yaw, pitch;
@@ -62,7 +62,7 @@ bool firstMouse = true;
 
 Shader* shader = nullptr;
 Model* terrain = nullptr;
-Model* griffins = nullptr;
+Griffin* griffins = nullptr;
 
 #pragma region INPUT_FUNCTIONS
 
@@ -89,12 +89,6 @@ void keypress(unsigned char key, int x, int y) {
 	}
 	if (key == 'q') {
 		camera.position -= camera.up * CAMERASPEED * delta;
-	}
-	if (key == 'm') {
-		model = scale(model, vec3(1.5f, 1.5f, 1.5f));
-	}
-	if (key == 'n') {
-		model = scale(model, vec3(0.75f, 0.75f, 0.75f));
 	}
 }
 
@@ -178,18 +172,16 @@ void display() {
 	shader->use();
 
 	//Declare your uniform variables that will be used in your shader
-	int matrix_location = glGetUniformLocation(shader->ID, "model");
 	int view_mat_location = glGetUniformLocation(shader->ID, "view");
 	int proj_mat_location = glGetUniformLocation(shader->ID, "proj");
 
 	// update uniforms & draw
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
 
-	terrain->Draw(*shader);
+	//terrain->Draw();
 	
-	griffins->Draw(*shader);
+	griffins->Draw(delta);
 	glutSwapBuffers();
 }
 
@@ -204,7 +196,7 @@ void updateScene() {
 	last_time = curr_time;
 
 	view = look_at(camera.position, camera.position + camera.direction, camera.up);
-
+	
 	// Draw the next frame
 	glutPostRedisplay();
 }
@@ -213,8 +205,9 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
-	terrain = new Model("snowymountain.obj", shader->ID);
-	griffins = new Model("griffin.obj", shader->ID);
+	terrain = new Model("snowymountain.obj", vec3(0, 0, 0), shader->ID);
+	std::cout << "Griffin Model:" << "\n";
+	griffins = new Griffin("griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj", shader->ID);
 	
 }
 

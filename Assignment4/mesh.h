@@ -29,7 +29,7 @@ public:
 
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, GLuint shaderProgramID);
 
-	void Draw();
+	void Draw(mat4 model);
 private:
 	unsigned int VAO, VBO, EBO;
 	GLuint shaderProgramID;

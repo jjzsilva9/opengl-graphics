@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="griffin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths_funcs.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="PerlinNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="griffin.h" />
     <ClInclude Include="maths_funcs.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
