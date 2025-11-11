@@ -36,16 +36,21 @@ Griffin::Griffin(const char* body_path, const char* left_wing_path, const char* 
 void Griffin::Draw(float deltaTime) {
 
     animationTime += deltaTime;
-    float wingAngle = 100.0f + 50.0f * sin(animationTime * 1 / 2 * 3.14f);
+
+    float angle = animationTime * 1 / 2 * 3.14f;
+    vec3 flightPos = vec3(cos(angle), 0, sin(angle));
+    float heading = angle;
+    float wingAngle = 100.0f + 50.0f * sin(angle);
+
     vec3 base_orientation = vec3(0, 0, 0);
-    vec3 base_translation = vec3(0, 0, 0);
+    vec3 base_translation = flightPos;
     mat4 local1 = identity_mat4();
     local1 = rotate_x_deg(local1, base_orientation.v[0]);
     local1 = rotate_y_deg(local1, base_orientation.v[1]);
     local1 = rotate_z_deg(local1, base_orientation.v[2]);
     local1 = translate(local1, base_translation);
 
-    models[0].model = models[0].model * local1;
+    models[0].model = local1;
     models[0].Draw();
 
     vec3 joint1_orientation = vec3(0, 0, wingAngle);
@@ -54,7 +59,7 @@ void Griffin::Draw(float deltaTime) {
     local2 = rotate_x_deg(local2, joint1_orientation.v[0]);
     local2 = rotate_y_deg(local2, joint1_orientation.v[1]);
     local2 = rotate_z_deg(local2, joint1_orientation.v[2]);
-    local2 = translate(local2, base_translation);
+    local2 = translate(local2, joint1_translation);
 
     models[1].model = local1 * local2;
     models[1].Draw();
@@ -65,7 +70,7 @@ void Griffin::Draw(float deltaTime) {
     local3 = rotate_x_deg(local3, joint2_orientation.v[0]);
     local3 = rotate_y_deg(local3, joint2_orientation.v[1]);
     local3 = rotate_z_deg(local3, joint2_orientation.v[2]);
-    local3 = translate(local3, base_translation);
+    local3 = translate(local3, joint2_translation);
 
     models[2].model = local1 * local3;
     models[2].Draw();
