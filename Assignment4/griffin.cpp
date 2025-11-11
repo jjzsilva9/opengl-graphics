@@ -25,11 +25,11 @@ namespace std {
 
 using namespace std;
 
-Griffin::Griffin(const char* body_path, const char* left_wing_path, const char* right_wing_path, GLuint shaderProgramID) {
-    models.push_back(Model(body_path, vec3(0, 0, 0), shaderProgramID));
-    models.push_back(Model(left_wing_path, vec3(0, 0, 0), shaderProgramID));
-    models.push_back(Model(right_wing_path, vec3(0, 0, 0), shaderProgramID));
-
+Griffin::Griffin(GriffinFiles file_paths, vec3 position, GLuint shaderProgramID) {
+    models.push_back(Model(file_paths.body_path, position, shaderProgramID));
+    models.push_back(Model(file_paths.left_wing_path, position, shaderProgramID));
+    models.push_back(Model(file_paths.right_wing_path, position, shaderProgramID));
+    spawnPosition = position;
     animationTime = 0.0f;
 }
 
@@ -38,16 +38,26 @@ void Griffin::Draw(float deltaTime) {
     animationTime += deltaTime;
 
     float angle = animationTime * 1 / 2 * 3.14f;
-    vec3 flightPos = vec3(cos(angle), 0, sin(angle));
-    float heading = angle;
+    vec3 windOffset = vec3(cos(angle), sin(angle * 1.5f) * 0.25f, sin(angle));
+    vec3 flightPath = vec3(cos(angle * 0.2f) * 25.0f, 0, sin(angle * 0.2f) * 25.0f);
+    float heading = angle * 0.2f * 180.0f / 3.14f;
     float wingAngle = 100.0f + 50.0f * sin(angle);
 
-    vec3 base_orientation = vec3(0, 0, 0);
-    vec3 base_translation = flightPos;
+    vec3 base_orientation = vec3(0, -heading, 20.0f);
+    vec3 base_translation = flightPath + spawnPosition;
+
+    // DEBUG: Print the Y position every second
+    static float debugTimer = 0;
+    debugTimer += deltaTime;
+    if (debugTimer > 1.0f) {
+        printf("Y position: %.2f (spawn: %.2f, flight: %.2f, wind: %.2f)\n",
+            base_translation.v[1], spawnPosition.v[1], flightPath.v[1], windOffset.v[1]);
+        debugTimer = 0;
+    }
     mat4 local1 = identity_mat4();
     local1 = rotate_x_deg(local1, base_orientation.v[0]);
-    local1 = rotate_y_deg(local1, base_orientation.v[1]);
     local1 = rotate_z_deg(local1, base_orientation.v[2]);
+    local1 = rotate_y_deg(local1, base_orientation.v[1]);
     local1 = translate(local1, base_translation);
 
     models[0].model = local1;

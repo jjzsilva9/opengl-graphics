@@ -62,7 +62,7 @@ bool firstMouse = true;
 
 Shader* shader = nullptr;
 Model* terrain = nullptr;
-Griffin* griffins = nullptr;
+std::vector<Griffin> griffins;
 
 #pragma region INPUT_FUNCTIONS
 
@@ -179,9 +179,11 @@ void display() {
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 
-	//terrain->Draw();
+	terrain->Draw();
 	
-	griffins->Draw(delta);
+	for (unsigned int i = 0; i < griffins.size(); i++) {
+		griffins[i].Draw(delta);
+	}
 	glutSwapBuffers();
 }
 
@@ -207,7 +209,9 @@ void init()
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
 	terrain = new Model("snowymountain.obj", vec3(0, 0, 0), shader->ID);
 	std::cout << "Griffin Model:" << "\n";
-	griffins = new Griffin("griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj", shader->ID);
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(0, 0.1f, 0), shader->ID));
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(7, 0.1f, -5), shader->ID));
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(-7, 0.1f, -5), shader->ID));
 	
 }
 
