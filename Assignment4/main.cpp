@@ -209,10 +209,10 @@ void init()
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
 	terrain = new Model("snowymountain.obj", vec3(0, 0, 0), shader->ID);
 	std::cout << "Griffin Model:" << "\n";
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(0, 0.1f, 0), shader->ID));
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(7, 0.1f, -5), shader->ID));
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(0, 6.0f, 0), shader->ID));
+	/*griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(7, 0.1f, -5), shader->ID));
 	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(-7, 0.1f, -5), shader->ID));
-	
+	*/
 }
 
 

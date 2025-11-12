@@ -37,23 +37,15 @@ void Griffin::Draw(float deltaTime) {
 
     animationTime += deltaTime;
 
-    float angle = animationTime * 1 / 2 * 3.14f;
-    vec3 windOffset = vec3(cos(angle), sin(angle * 1.5f) * 0.25f, sin(angle));
-    vec3 flightPath = vec3(cos(angle * 0.2f) * 25.0f, 0, sin(angle * 0.2f) * 25.0f);
+    float angle = animationTime * 1 / 2 * 3.14f * 0.5f;
+    vec3 windOffset = vec3(0.2f * cos(angle), sin(angle * 1.5f) * 0.025f, 0.2f * sin(angle));
+    vec3 flightPath = vec3(cos(angle * 0.2f) * 5.0f, 0, sin(angle * 0.2f) * 5.0f);
     float heading = angle * 0.2f * 180.0f / 3.14f;
-    float wingAngle = 100.0f + 50.0f * sin(angle);
+    float wingAngle = 100.0f + 50.0f * sin(angle * 2.0f);
 
     vec3 base_orientation = vec3(0, -heading, 20.0f);
-    vec3 base_translation = flightPath + spawnPosition;
+    vec3 base_translation = flightPath + windOffset + spawnPosition;
 
-    // DEBUG: Print the Y position every second
-    static float debugTimer = 0;
-    debugTimer += deltaTime;
-    if (debugTimer > 1.0f) {
-        printf("Y position: %.2f (spawn: %.2f, flight: %.2f, wind: %.2f)\n",
-            base_translation.v[1], spawnPosition.v[1], flightPath.v[1], windOffset.v[1]);
-        debugTimer = 0;
-    }
     mat4 local1 = identity_mat4();
     local1 = rotate_x_deg(local1, base_orientation.v[0]);
     local1 = rotate_z_deg(local1, base_orientation.v[2]);
