@@ -34,7 +34,6 @@ private:
 	std::string directory;
 	GLuint shaderProgramID;
 	
-
 	void loadModel(const char* file_name);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
