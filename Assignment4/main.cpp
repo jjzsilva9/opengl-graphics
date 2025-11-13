@@ -34,7 +34,7 @@ namespace std {
 #include "griffin.h"
 #include "PerlinNoise.h"
 
-#define CAMERASPEED 10.0f
+#define CAMERASPEED 50.0f
 
 
 typedef struct
@@ -167,7 +167,7 @@ void display() {
 	// tell GL to only draw onto a pixel if the shape is closer to the viewer
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader->use();
@@ -210,9 +210,23 @@ void init()
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
 	terrain = new Model("terrain_with_rocks.obj", vec3(0, 0, 0), shader->ID);
 	std::cout << "Griffin Model:" << "\n";
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(0, 15.0f, 0), 5.0f, 0.25f, shader->ID));
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(25, 30, -20), 10.0f, 0.1f, shader->ID));
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(-25, 22.5f, 20), 7.5f, 0.2f, shader->ID));
+
+	GriffinFiles files{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" };
+
+	griffins.push_back(Griffin(files, vec3(0, 15.0f, 0), 5.0f, 0.25f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(25, 30, -20), 10.0f, 0.1f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(-25, 22.5f, 20), 7.5f, 0.2f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(0, 50.0f, 0), 8.0f, 0.25f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(60, 28.0f, -60), 10.0f, 0.1f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(-70, 20.0f, 65), 9.0f, 0.2f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(-80, 18.0f, 80), 7.0f, 0.18f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(75, 17.0f, 75), 8.5f, 0.22f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(-90, 19.0f, 70), 10.0f, 0.15f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(85, 18.0f, 70), 9.5f, 0.17f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(50, 30.0f, -70), 11.0f, 0.16f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(20, 36.0f, 15), 12.0f, 0.12f, shader->ID));
+
 }
 
 
@@ -224,7 +238,6 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Project");
-	glutFullScreen();
 
 	// Tell glut where the display function is
 	glutDisplayFunc(display);
@@ -243,6 +256,7 @@ int main(int argc, char** argv) {
 	}
 	// Set up your objects and shaders
 	init();
+	glutFullScreen();
 	// Begin infinite event loop
 	glutMainLoop();
 	return 0;
