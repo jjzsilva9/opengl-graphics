@@ -25,23 +25,25 @@ namespace std {
 
 using namespace std;
 
-Griffin::Griffin(GriffinFiles file_paths, vec3 position, GLuint shaderProgramID) {
+Griffin::Griffin(GriffinFiles file_paths, vec3 position, float flightRadius, float flightSpeed, GLuint shaderProgramID) {
     models.push_back(Model(file_paths.body_path, position, shaderProgramID));
     models.push_back(Model(file_paths.left_wing_path, position, shaderProgramID));
     models.push_back(Model(file_paths.right_wing_path, position, shaderProgramID));
     spawnPosition = position;
     animationTime = 0.0f;
+    this->flightRadius = flightRadius;
+    this->flightSpeed = flightSpeed;
 }
 
 void Griffin::Draw(float deltaTime) {
 
     animationTime += deltaTime;
 
-    float angle = animationTime * 1 / 2 * 3.14f * 0.5f;
+    float angle = animationTime * flightSpeed * 3.14f;;
     vec3 windOffset = vec3(0.2f * cos(angle), sin(angle * 1.5f) * 0.025f, 0.2f * sin(angle));
-    vec3 flightPath = vec3(cos(angle * 0.2f) * 5.0f, 0, sin(angle * 0.2f) * 5.0f);
+    vec3 flightPath = vec3(cos(angle * 0.2f) * flightRadius, 0, sin(angle * 0.2f) * flightRadius);
     float heading = angle * 0.2f * 180.0f / 3.14f;
-    float wingAngle = 100.0f + 50.0f * sin(angle * 2.0f);
+    float wingAngle = 100.0f + 50.0f * sin(angle * 5.0f);
 
     vec3 base_orientation = vec3(0, -heading, 20.0f);
     vec3 base_translation = flightPath + windOffset + spawnPosition;

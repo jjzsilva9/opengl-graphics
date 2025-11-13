@@ -39,7 +39,7 @@ namespace std {
 
 typedef struct
 {
-	vec3 position = vec3(0.0f, 0.0f, 0.0f);
+	vec3 position = vec3(0.0f, 30.0f, 30.0f);
 	vec3 direction = vec3(0.0f, 0.0f, -1.0f);
 	vec3 up = vec3(0.0f, 1.0f, 0.0f);
 } Camera;
@@ -68,8 +68,8 @@ std::vector<Griffin> griffins;
 
 // Placeholder code for the keypress
 void keypress(unsigned char key, int x, int y) {
-	if (key == 'x') {
-		//Translate the base, etc.
+	if (key == 27) {
+		glutLeaveMainLoop();
 	}
 
 	if (key == 'w') {
@@ -138,6 +138,7 @@ void mouse(int x, int y) {
 void reshape(int x, int y) {
 	width = x;
 	height = y;
+	glViewport(0, 0, x, y);
 	persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 }
 
@@ -209,10 +210,9 @@ void init()
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
 	terrain = new Model("terrain_with_rocks.obj", vec3(0, 0, 0), shader->ID);
 	std::cout << "Griffin Model:" << "\n";
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(0, 6.0f, 0), shader->ID));
-	/*griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(7, 0.1f, -5), shader->ID));
-	griffins.push_back(Griffin(GriffinFiles{ "griffin_body.obj", "griffin_leftwing.obj", "griffin_rightwing.obj" }, vec3(-7, 0.1f, -5), shader->ID));
-	*/
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(0, 15.0f, 0), 5.0f, 0.25f, shader->ID));
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(25, 30, -20), 10.0f, 0.1f, shader->ID));
+	griffins.push_back(Griffin(GriffinFiles{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" }, vec3(-25, 22.5f, 20), 7.5f, 0.2f, shader->ID));
 }
 
 
@@ -224,12 +224,13 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Project");
+	glutFullScreen();
 
 	// Tell glut where the display function is
 	glutDisplayFunc(display);
 	glutIdleFunc(updateScene);
 	glutKeyboardFunc(keypress);
-	//glutSetCursor(GLUT_CURSOR_NONE);
+	glutSetCursor(GLUT_CURSOR_NONE);
 	glutPassiveMotionFunc(mouse);
 	glutReshapeFunc(reshape);
 
