@@ -66,12 +66,13 @@ std::vector<Griffin> griffins;
 
 #pragma region INPUT_FUNCTIONS
 
-// Placeholder code for the keypress
 void keypress(unsigned char key, int x, int y) {
+	// ESC Key to quit
 	if (key == 27) {
 		glutLeaveMainLoop();
 	}
 
+	// Forward/Backward and sideways movement
 	if (key == 'w') {
 		camera.position += camera.direction * CAMERASPEED * delta;
 	}
@@ -84,6 +85,8 @@ void keypress(unsigned char key, int x, int y) {
 	if (key == 'd') {
 		camera.position += normalise(cross(camera.direction, camera.up)) * CAMERASPEED * delta;
 	}
+
+	// Up/Down Movement
 	if (key == 'e') {
 		camera.position += camera.up * CAMERASPEED * delta;
 	}
@@ -95,34 +98,42 @@ void keypress(unsigned char key, int x, int y) {
 
 
 void mouse(int x, int y) {
-	//std::cout << "Mouse moved to: " << x << ", " << y << std::endl;
+
+	// If the mouse has just entered the window
+	// Set lastX and lastY to the current x and y
 	if (firstMouse) {
 		lastX = x;
 		lastY = y;
 		firstMouse = false;
 	}
 
+	// Calculate difference from last frame
 	float xoffset = x - lastX;
 	float yoffset = lastY - y;
 
 	lastX = x;
 	lastY = y;
 
+	// Convert to yaw and pitch
 	yaw += xoffset * 0.1f;
 	pitch += yoffset * 0.1f;
 
+	// Clip max and min pitch
 	if (pitch > 89.0f) {
 		pitch = 89.0f;
 	}
 	if (pitch < -89.0f) {
 		pitch = -89.0f;
 	}
+
+	// Calculate viewing direction
 	vec3 viewDirection;
 	viewDirection.v[0] = cos(radian(yaw)) * cos(radian(pitch));
 	viewDirection.v[1] = sin(radian(pitch));
 	viewDirection.v[2] = sin(radian(yaw)) * cos(radian(pitch));
 	camera.direction = normalise(viewDirection);
 
+	// If the cursor is near the edge of the screen, warp it to the centre
 	if ((x < width / 100) || (x > 99 * width / 100) || (y < height / 100) || (y > 99 * height / 100)) {
 		glutWarpPointer(width / 2, height / 2);
 		lastX = width / 2;
