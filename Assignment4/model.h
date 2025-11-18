@@ -19,12 +19,13 @@ typedef unsigned int GLuint;
 // Project includes - needed for definitions
 #include "maths_funcs.h"
 #include "mesh.h"  // Added for Texture struct
+#include "shader.h"
 
 class Model {
 public:
 	mat4 model;
 
-	Model(const char* path, vec3 position, GLuint shaderProgramID);
+	Model(const char* path, vec3 position, Shader* shader);
 	void Draw();
 	void translate(vec3 offset);
 	void rotate(vec3 offset);
@@ -33,7 +34,7 @@ private:
 	std::vector<Mesh> meshes;
 	std::string directory;
 	GLuint shaderProgramID;
-	
+	Shader* shader;
 	void loadModel(const char* file_name);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);

@@ -155,6 +155,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="simpleFragmentShader.txt">

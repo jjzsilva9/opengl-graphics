@@ -25,10 +25,10 @@ namespace std {
 
 using namespace std;
 
-Griffin::Griffin(GriffinFiles file_paths, vec3 position, float flightRadius, float flightSpeed, GLuint shaderProgramID) {
-    models.push_back(Model(file_paths.body_path, position, shaderProgramID));
-    models.push_back(Model(file_paths.left_wing_path, position, shaderProgramID));
-    models.push_back(Model(file_paths.right_wing_path, position, shaderProgramID));
+Griffin::Griffin(GriffinFiles file_paths, vec3 position, float flightRadius, float flightSpeed, Shader* shader) {
+    models.push_back(Model(file_paths.body_path, position, shader));
+    models.push_back(Model(file_paths.left_wing_path, position, shader));
+    models.push_back(Model(file_paths.right_wing_path, position, shader));
     spawnPosition = position;
     animationTime = 0.0f;
     this->flightRadius = flightRadius;

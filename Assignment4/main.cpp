@@ -219,24 +219,24 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
-	terrain = new Model("terrain_with_rocks.obj", vec3(0, 0, 0), shader->ID);
+	terrain = new Model("terrain_with_rocks.obj", vec3(0, 0, 0), shader);
 	std::cout << "Griffin Model:" << "\n";
 
 	GriffinFiles files{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" };
 
-	griffins.push_back(Griffin(files, vec3(0, 15.0f, 0), 5.0f, 0.25f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(25, 30, -20), 10.0f, 0.1f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(-25, 22.5f, 20), 7.5f, 0.2f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(0, 50.0f, 0), 8.0f, 0.25f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(60, 28.0f, -60), 10.0f, 0.1f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(-70, 20.0f, 65), 9.0f, 0.2f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(-80, 18.0f, 80), 7.0f, 0.18f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(75, 17.0f, 75), 8.5f, 0.22f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(-90, 19.0f, 70), 10.0f, 0.15f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(85, 18.0f, 70), 9.5f, 0.17f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(50, 30.0f, -70), 11.0f, 0.16f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader->ID));
-	griffins.push_back(Griffin(files, vec3(20, 36.0f, 15), 12.0f, 0.12f, shader->ID));
+	griffins.push_back(Griffin(files, vec3(0, 15.0f, 0), 5.0f, 0.25f, shader));
+	griffins.push_back(Griffin(files, vec3(25, 30, -20), 10.0f, 0.1f, shader));
+	griffins.push_back(Griffin(files, vec3(-25, 22.5f, 20), 7.5f, 0.2f, shader));
+	griffins.push_back(Griffin(files, vec3(0, 50.0f, 0), 8.0f, 0.25f, shader));
+	griffins.push_back(Griffin(files, vec3(60, 28.0f, -60), 10.0f, 0.1f, shader));
+	griffins.push_back(Griffin(files, vec3(-70, 20.0f, 65), 9.0f, 0.2f, shader));
+	griffins.push_back(Griffin(files, vec3(-80, 18.0f, 80), 7.0f, 0.18f, shader));
+	griffins.push_back(Griffin(files, vec3(75, 17.0f, 75), 8.5f, 0.22f, shader));
+	griffins.push_back(Griffin(files, vec3(-90, 19.0f, 70), 10.0f, 0.15f, shader));
+	griffins.push_back(Griffin(files, vec3(85, 18.0f, 70), 9.5f, 0.17f, shader));
+	griffins.push_back(Griffin(files, vec3(50, 30.0f, -70), 11.0f, 0.16f, shader));
+	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
+	griffins.push_back(Griffin(files, vec3(20, 36.0f, 15), 12.0f, 0.12f, shader));
 
 }
 

@@ -16,7 +16,7 @@ class Griffin{
 	std::vector<Model> models;
 
 	public:
-		Griffin(GriffinFiles file_paths, vec3 position, float FlightRadius, float flightSpeed, GLuint shaderProgramID);
+		Griffin(GriffinFiles file_paths, vec3 position, float FlightRadius, float flightSpeed, Shader* shader);
 		void Draw(float deltaTime);
 
 	private:
