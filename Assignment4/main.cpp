@@ -219,7 +219,7 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
-	terrain = new Model("terrain_with_rocks.obj", vec3(0, 0, 0), shader);
+	terrain = new Model("terrain_with_textures.obj", vec3(0, 0, 0), shader);
 	std::cout << "Griffin Model:" << "\n";
 
 	GriffinFiles files{ "griffin_body_shrunk.obj", "griffin_leftwing_shrunk.obj", "griffin_rightwing_shrunk.obj" };
