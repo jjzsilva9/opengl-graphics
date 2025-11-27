@@ -65,6 +65,8 @@ void Model::loadModel(const char* file_name) {
 		fprintf(stderr, "ERROR: reading mesh %s\n%s", file_name, aiGetErrorString());
 		return;
 	}
+
+	directory = std::string(file_name).substr(0, std::string(file_name).find_last_of('\\/'));
 	processNode(scene->mRootNode, scene);
 
 	aiReleaseImport(scene);
@@ -102,13 +104,18 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 		if (mesh->HasTextureCoords(0)) {
 			const aiVector3D* vt = &(mesh->mTextureCoords[0][v_i]);
-			vertex.TextureCoords = vec2(vt->x, vt->y);
+			vertex.TextureCoords = vec2(vt->x, -vt->y);
 		}
+		else {
+			vertex.TextureCoords = vec2(0.0f, 0.0f);
+		}
+
 		if (mesh->HasTangentsAndBitangents()) {
-			/* You can extract tangents and bitangents here              */
-			/* Note that you might need to make Assimp generate this     */
-			/* data for you. Take a look at the flags that aiImportFile  */
-			/* can take.                                                 */
+			const aiVector3D* vta = &(mesh->mTangents[v_i]);
+			vertex.Tangent = vec3(vta->x, vta->y, vta->z);
+
+			const aiVector3D* vb = &(mesh->mBitangents[v_i]);
+			vertex.Bitangent = vec3(vb->x, vb->y, vb->z);
 		}
 		vertices.push_back(vertex);
 	}
@@ -150,7 +157,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma) {
 	string filename = string(path);
-	filename = directory + '/' + filename;
+	std::replace(filename.begin(), filename.end(), '\\', '/');
+	//filename = directory + '/' + filename;
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -180,7 +188,7 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 	}
 	else
 	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
+		std::cout << "Texture failed to load at path: " << filename << std::endl;
 		stbi_image_free(data);
 	}
 

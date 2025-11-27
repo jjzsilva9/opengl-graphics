@@ -38,6 +38,8 @@ void Mesh::Draw(mat4 model) {
 
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
+	unsigned int normalNr = 1;
+	unsigned int heightNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		string number;
@@ -48,15 +50,23 @@ void Mesh::Draw(mat4 model) {
 		else if (name == "texture_specular") {
 			number = std::to_string(specularNr++);
 		}
+		else if (name == "texture_normal") {
+			number = std::to_string(normalNr++);
+		}
+		else if (name == "texture_height") {
+			number = std::to_string(heightNr++);
+		}
 		shader->setInt(("material." + name + number).c_str(), i);
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
-	glActiveTexture(GL_TEXTURE0);
 
 	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
     
 void Mesh::setupMesh() {
