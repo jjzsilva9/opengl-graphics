@@ -33,6 +33,7 @@ public:
 private:
 	std::vector<Mesh> meshes;
 	std::string directory;
+	static std::vector<Texture> textures_loaded;
 	GLuint shaderProgramID;
 	Shader* shader;
 	void loadModel(const char* file_name);

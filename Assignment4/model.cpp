@@ -26,6 +26,8 @@ namespace std {
 
 using namespace std;
 
+std::vector<Texture> Model::textures_loaded;
+
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
 Model::Model(const char* path, vec3 position, Shader* shader) {
@@ -58,7 +60,7 @@ void Model::loadModel(const char* file_name) {
 		   
 	const aiScene* scene = aiImportFile(
 		file_name,
-		aiProcess_Triangulate | aiProcess_PreTransformVertices
+		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace
 	);
 
 	if (!scene) {
@@ -146,11 +148,23 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
-		Texture texture;
-		texture.id = TextureFromFile(str.C_Str(), directory);
-		texture.type = typeName;
-		texture.path = str;
-		textures.push_back(texture);
+		bool skip = false;
+		for (unsigned int j = 0; j < textures_loaded.size(); j++) {
+			std::cout << textures_loaded[j].path.C_Str() << ", " << str.C_Str() << std::endl;
+			if (std::strcmp(textures_loaded[j].path.C_Str(), str.C_Str()) == 0) {
+				textures.push_back(textures_loaded[j]);
+				skip = true;
+				break;
+			}
+		}
+		if (!skip) {
+			Texture texture;
+			texture.id = TextureFromFile(str.C_Str(), directory);
+			texture.type = typeName;
+			texture.path = str;
+			textures.push_back(texture);
+			textures_loaded.push_back(texture);
+		}
 	}
 	return textures;
 }
@@ -159,7 +173,7 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 	string filename = string(path);
 	std::replace(filename.begin(), filename.end(), '\\', '/');
 	//filename = directory + '/' + filename;
-
+	std::cout << filename << std::endl;
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
