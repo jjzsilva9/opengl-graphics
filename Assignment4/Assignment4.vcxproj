@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="directionallight.cpp" />
     <ClCompile Include="griffin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths_funcs.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="PerlinNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="directionallight.h" />
     <ClInclude Include="griffin.h" />
     <ClInclude Include="maths_funcs.h" />
     <ClInclude Include="mesh.h" />

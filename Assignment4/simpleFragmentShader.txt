@@ -5,10 +5,10 @@ in vec2 TexCoord;
 in mat4 view_matrix;
 
 // Directional Light Source Properties
-vec4 LightPosition = vec4 (10.0, 10.0, 4.0, 1.0); // Light position in world coords.
-vec3 Ld = vec3 (0.7, 0.7, 0.7); // Diffuse
-vec3 Ls = vec3 (1.0, 1.0, 1.0); // Specular
-vec3 La = vec3 (0.2, 0.2, 0.2); // Ambient
+uniform vec4 LightPosition; // Light position in world coords.
+uniform vec3 Ld; // Diffuse
+uniform vec3 Ls; // Specular
+uniform vec3 La; // Ambient
 
 // Surface Properties
 vec3 Kd = vec3 (1.0, 0.5, 1.0); // Diffuse

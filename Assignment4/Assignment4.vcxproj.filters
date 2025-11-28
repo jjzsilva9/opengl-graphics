@@ -33,6 +33,9 @@
     <ClCompile Include="griffin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="directionallight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="maths_funcs.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="directionallight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

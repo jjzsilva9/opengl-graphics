@@ -33,6 +33,7 @@ namespace std {
 #include "model.h"
 #include "griffin.h"
 #include "PerlinNoise.h"
+#include "directionallight.h"
 
 #define CAMERASPEED 50.0f
 
@@ -63,6 +64,7 @@ bool firstMouse = true;
 Shader* shader = nullptr;
 Model* terrain = nullptr;
 std::vector<Griffin> griffins;
+DirectionalLight* lightSource = nullptr;
 
 #pragma region INPUT_FUNCTIONS
 
@@ -191,6 +193,8 @@ void display() {
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 
+	lightSource->Draw();
+
 	terrain->Draw();
 	
 	for (unsigned int i = 0; i < griffins.size(); i++) {
@@ -233,6 +237,8 @@ void init()
 	griffins.push_back(Griffin(files, vec3(-80, 18.0f, 80), 7.0f, 0.18f, shader));
 	griffins.push_back(Griffin(files, vec3(50, 30.0f, -70), 11.0f, 0.16f, shader));
 	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
+
+	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.2, 0.2, 0.2), shader->ID, false);
 
 }
 
