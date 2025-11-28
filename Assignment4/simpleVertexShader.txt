@@ -4,13 +4,9 @@ in vec3 vertex_position;
 in vec3 vertex_normal;
 in vec2 vertex_texture;
 
-out vec3 LightIntensity;
+out vec3 eyeCoords, tnorm;
 out vec2 TexCoord;
-
-vec4 LightPosition = vec4 (10.0, 10.0, 4.0, 1.0); // Light position in world coords.
-vec3 Kd = vec3 (0.55, 0.45, 0.35);
-vec3 Ld = vec3 (1.0, 1.0, 1.0); // Light source intensity
-
+out mat4 view_matrix;
 
 uniform mat4 view;
 uniform mat4 proj;
@@ -22,19 +18,15 @@ void main(){
   mat3 NormalMatrix =  mat3(ModelViewMatrix);
   // Convert normal and position to eye coords
   // Normal in view space
-  vec3 tnorm = normalize( NormalMatrix * vertex_normal);
+  tnorm = normalize( NormalMatrix * vertex_normal);
   // Position in view space
-  vec4 eyeCoords = ModelViewMatrix * vec4(vertex_position,1.0);
-  //normalised vector towards the light source
- vec3 s = normalize(vec3(LightPosition - eyeCoords));
-  
-  // The diffuse shading equation, dot product gives us the cosine of angle between the vectors
-  LightIntensity = Ld * Kd * max( dot( s, tnorm ), 0.0 );
+  eyeCoords = vec3(ModelViewMatrix * vec4(vertex_position,1.0));
 
   TexCoord = vertex_texture;
+  view_matrix = view;
   
   // Convert position to clip coordinates and pass along
-  gl_Position = proj * view * model * vec4(vertex_position,1.0);
+  gl_Position = proj * vec4(eyeCoords, 1.0);
 }
 
 

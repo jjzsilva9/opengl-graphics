@@ -1,9 +1,39 @@
 #version 330
 
-in vec3 LightIntensity;
+in vec3 eyeCoords, tnorm;
 in vec2 TexCoord;
+in mat4 view_matrix;
+
+// Directional Light Source Properties
+vec4 LightPosition = vec4 (10.0, 10.0, 4.0, 1.0); // Light position in world coords.
+vec3 Ld = vec3 (0.7, 0.7, 0.7); // Diffuse
+vec3 Ls = vec3 (1.0, 1.0, 1.0); // Specular
+vec3 La = vec3 (0.2, 0.2, 0.2); // Ambient
+
+// Surface Properties
+vec3 Kd = vec3 (1.0, 0.5, 1.0); // Diffuse
+vec3 Ks = vec3 (1.0, 1.0, 1.0); // Specular
+vec3 Ka = vec3 (1.0, 1.0, 1.0); // Ambient
+
+float specular_exponent = 100.0;
+
 
 uniform sampler2D ourTexture;
 void main(){
-	gl_FragColor = texture(ourTexture, TexCoord);
+	
+	// Ambient Term
+	vec3 Ia = La * Ka;
+
+	// Difffuse Term
+	vec3 light_eye = vec3(view_matrix * LightPosition);
+	vec3 L = normalize(light_eye - eyeCoords);
+	vec3 Id = Ld * Kd * max(dot(L, tnorm), 0.0);
+
+	// Specular Intensity
+	vec3 R = reflect(-L, tnorm);
+	vec3 V = normalize(eyeCoords);
+	vec3 Is = Ls * Ks * pow(max(dot(R, V), 0.0), specular_exponent);
+
+	// Combine terms and multiply by the texture
+	gl_FragColor = vec4((Ia + Id + Is) * texture(ourTexture, TexCoord).rgb, 1.0);
 }
