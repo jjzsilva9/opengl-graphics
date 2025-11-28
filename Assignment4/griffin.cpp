@@ -45,13 +45,13 @@ void Griffin::Draw(float deltaTime) {
     vec3 windOffset = vec3(0.2f * cos(angle), sin(angle * 1.5f) * 0.025f, 0.2f * sin(angle));
 
     // Circular flight path
-    vec3 flightPath = vec3(cos(angle * 0.2f) * flightRadius, 0, sin(angle * 0.2f) * flightRadius);
+    vec3 flightPath = vec3(cos(angle * 0.6f) * flightRadius, 0, sin(angle * 0.6f) * flightRadius);
 
     // Heading to maintain rotation through the flight path
-    float heading = angle * 0.2f * 180.0f / 3.14f;
+    float heading = angle * 0.6f * 180.0f / 3.14f;
 
     // Cyclical wing animation
-    float wingAngle = 100.0f + 50.0f * sin(angle * 5.0f);
+    float wingAngle = 100.0f + 50.0f * sin(angle * 6.0f);
 
     // Setting position and rotation of the body
     vec3 base_orientation = vec3(0, -heading, 20.0f);
