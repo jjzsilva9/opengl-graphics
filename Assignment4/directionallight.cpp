@@ -17,9 +17,12 @@ DirectionalLight::DirectionalLight(vec4 position, vec3 diffuse, vec3 specular, v
 	this->ambient = ambient;
 	this->dayCycle = dayCycle;
 	this->shaderProgramID = shaderProgramID;
+	this->timeOfDay = 0.5f;
+	this->cycleDuration = 60.0f;
 }
 
-void DirectionalLight::Draw() {
+void DirectionalLight::Draw(float deltaTime) {
+	this->Update(deltaTime);
 	int position_location = glGetUniformLocation(shaderProgramID, "LightPosition");
 	glUniform3fv(position_location, 1, position.v);
 
@@ -33,9 +36,88 @@ void DirectionalLight::Draw() {
 	glUniform3fv(ambient_location, 1, ambient.v);
 }
 
-void DirectionalLight::Update() {
+void DirectionalLight::Update(float deltaTime) {
 	if (dayCycle) {
-		// TODO Define a nice cycle to change the diffuse ambient and specular terms with the changing of the day
-		return;
+		timeOfDay += deltaTime / cycleDuration;
+		if (timeOfDay > 1.0f) {
+			timeOfDay -= 1.0f;
+		}
+
+		position = getLightPosition(timeOfDay);
+
+		diffuse = getLightColor(timeOfDay);
+		specular = getLightColor(timeOfDay);
+		ambient = getAmbientColor(timeOfDay);
 	}
+}
+
+vec3 DirectionalLight::getLightColor(float time) {
+	vec3 nightColor = vec3(0.1f, 0.1f, 0.2f);      // Dark blue
+	vec3 dawnColor = vec3(1.0f, 0.6f, 0.3f);       // Orange/red
+	vec3 dayColor = vec3(1.0f, 1.0f, 0.95f);       // Bright white/yellow
+	vec3 duskColor = vec3(1.0f, 0.5f, 0.2f);       // Deep orange
+
+	if (time < 0.25f) {
+		// Midnight to sunrise (0.0 - 0.25)
+		float t = time / 0.25f;
+		return vec3(
+			nightColor.v[0] + t * (dawnColor.v[0] - nightColor.v[0]),
+			nightColor.v[1] + t * (dawnColor.v[1] - nightColor.v[1]),
+			nightColor.v[2] + t * (dawnColor.v[2] - nightColor.v[2])
+		);
+	}
+	else if (time < 0.5f) {
+		// Sunrise to noon (0.25 - 0.5)
+		float t = (time - 0.25f) / 0.25f;
+		return vec3(
+			dawnColor.v[0] + t * (dayColor.v[0] - dawnColor.v[0]),
+			dawnColor.v[1] + t * (dayColor.v[1] - dawnColor.v[1]),
+			dawnColor.v[2] + t * (dayColor.v[2] - dawnColor.v[2])
+		);
+	}
+	else if (time < 0.75f) {
+		// Noon to sunset (0.5 - 0.75)
+		float t = (time - 0.5f) / 0.25f;
+		return vec3(
+			dayColor.v[0] + t * (duskColor.v[0] - dayColor.v[0]),
+			dayColor.v[1] + t * (duskColor.v[1] - dayColor.v[1]),
+			dayColor.v[2] + t * (duskColor.v[2] - dayColor.v[2])
+		);
+	}
+	else {
+		// Sunset to midnight (0.75 - 1.0)
+		float t = (time - 0.75f) / 0.25f;
+		return vec3(
+			duskColor.v[0] + t * (nightColor.v[0] - duskColor.v[0]),
+			duskColor.v[1] + t * (nightColor.v[1] - duskColor.v[1]),
+			duskColor.v[2] + t * (nightColor.v[2] - duskColor.v[2])
+		);
+	}
+}
+
+vec3 DirectionalLight::getAmbientColor(float time) {
+	vec3 nightAmbient = vec3(0.05f, 0.05f, 0.1f);   // Very dark blue
+	vec3 dayAmbient = vec3(0.3f, 0.3f, 0.35f);      // Light gray/blue
+
+	float angle = time * 2.0f * 3.14f;
+	float sunHeight = sin(angle);
+	float t = (sunHeight + 1.0f) / 2.0f;
+
+	return vec3(
+		nightAmbient.v[0] + t * (dayAmbient.v[0] - nightAmbient.v[0]),
+		nightAmbient.v[1] + t * (dayAmbient.v[1] - nightAmbient.v[1]),
+		nightAmbient.v[2] + t * (dayAmbient.v[2] - nightAmbient.v[2])
+	);
+}
+
+vec3 DirectionalLight::getLightPosition(float time) {
+	float angle = time * 2.0f * 3.14f;
+
+	float radius = 1000.0f;
+
+	float x = radius * cos(angle);
+	float y = radius * sin(angle);
+	float z = 0.0f;
+
+	return vec3(x, y, z);
 }

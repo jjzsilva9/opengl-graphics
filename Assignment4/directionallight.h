@@ -19,6 +19,14 @@ public:
 	GLuint shaderProgramID;
 
 	DirectionalLight(vec4 position, vec3 diffuse, vec3 specular, vec3 ambient, GLuint shaderProgramID, bool dayCycle = false);
-	void Draw();
-	void Update();
+	void Draw(float deltaTime);
+	
+private:
+	float timeOfDay;
+	float cycleDuration;
+	void Update(float deltaTime);
+	vec3 getLightColor(float time);
+	vec3 getAmbientColor(float time);
+	vec3 getLightPosition(float time);
+
 };
