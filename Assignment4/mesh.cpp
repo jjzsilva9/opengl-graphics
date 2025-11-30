@@ -35,18 +35,27 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 }
 
 void Mesh::Draw(mat4 model) {
+	Material material;
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		string name = textures[i].type;
 		if (name == "texture_diffuse") {
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 			shader->setInt("ourTexture", 0);
+			material = textures[i].material;
 		}
 		else if (name == "texture_normal") {
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 			shader->setInt("normalMap", 1);
 		}
 	}
+
+	int diffuse_location = glGetUniformLocation(shaderProgramID, "Kd");
+	int specular_location = glGetUniformLocation(shaderProgramID, "Ks");
+	int ambient_location = glGetUniformLocation(shaderProgramID, "Ka");
+	glUniform3fv(diffuse_location, 1, material.Kd.v);
+	glUniform3fv(specular_location, 1, material.Ks.v);
+	glUniform3fv(ambient_location, 1, material.Ka.v);
 
 	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, model.m);

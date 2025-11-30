@@ -19,11 +19,19 @@ struct Vertex {
 	vec3 Bitangent;
 };
 
+struct Material {
+	vec3 Kd; // Diffuse
+	vec3 Ks; // Specular
+	vec3 Ka; // Ambient
+};
+
 struct Texture {
     unsigned int id;
     std::string type;
 	aiString path;
+	Material material;
 };
+
 
 class Mesh {
 public:

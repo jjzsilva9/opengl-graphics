@@ -119,9 +119,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			const aiVector3D* vb = &(mesh->mBitangents[v_i]);
 			vertex.Bitangent = vec3(vb->x, vb->y, vb->z);
 		}
-		else {
-			std::cout << "MODEL HAS NO TANGENTS AND BITANGENTS" << std::endl;
-		}
 		vertices.push_back(vertex);
 	}
 
@@ -134,18 +131,55 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	if (mesh->mMaterialIndex >= 0) {
+		Material textureMaterial;
+		aiColor3D color;
+
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+		// Extract ambient, diffuse, and specular colors from the mtl file
+		if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_AMBIENT, color)) {
+			textureMaterial.Ka = vec3(color.r, color.g, color.b);
+		}
+		else {
+			textureMaterial.Ka = vec3(1.0f, 1.0f, 1.0f);
+		}
+
+		if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, color)) {
+			textureMaterial.Kd = vec3(color.r, color.g, color.b);
+		}
+		else {
+			textureMaterial.Kd = vec3(0.8f, 0.8f, 0.8f);
+		}
+
+		if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_SPECULAR, color)) {
+			textureMaterial.Ks = vec3(color.r, color.g, color.b);
+		}
+		else {
+			textureMaterial.Ks = vec3(0.1f, 0.1f, 0.1f);
+		}
 		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		for (Texture& a : diffuseMaps) {
+			a.material = textureMaterial;
+		}
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		for (Texture& a : specularMaps) {
+			a.material = textureMaterial;
+		}
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
 		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
 		if (normalMaps.empty()) {
 			normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		}
+		for (Texture& a : normalMaps) {
+			a.material = textureMaterial;
+		}
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+	}
+	else {
+		std::cout << "NO MATERIAL INFO";
 	}
 	std::cout << "Faces done" << "\n";
 

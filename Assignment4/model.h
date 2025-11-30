@@ -24,6 +24,7 @@ typedef unsigned int GLuint;
 class Model {
 public:
 	mat4 model;
+	Material material;
 
 	Model(const char* path, vec3 position, Shader* shader);
 	void Draw();
