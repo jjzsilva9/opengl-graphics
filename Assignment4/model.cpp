@@ -119,6 +119,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			const aiVector3D* vb = &(mesh->mBitangents[v_i]);
 			vertex.Bitangent = vec3(vb->x, vb->y, vb->z);
 		}
+		else {
+			std::cout << "MODEL HAS NO TANGENTS AND BITANGENTS" << std::endl;
+		}
 		vertices.push_back(vertex);
 	}
 
@@ -137,6 +140,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+		if (normalMaps.empty()) {
+			normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		}
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 	std::cout << "Faces done" << "\n";
 
@@ -171,6 +180,15 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma) {
 	string filename = string(path);
+
+	// Remove normal intensity from file path
+	size_t bmPos = filename.find("-bm ");
+	if (bmPos != string::npos) {
+		size_t spaceAfterValue = filename.find(' ', bmPos + 4);
+		if (spaceAfterValue != string::npos) {
+			filename = filename.substr(spaceAfterValue + 1);
+		}
+	}
 	std::replace(filename.begin(), filename.end(), '\\', '/');
 	
 	unsigned int textureID;

@@ -35,29 +35,17 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 }
 
 void Mesh::Draw(mat4 model) {
-
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		string number;
 		string name = textures[i].type;
 		if (name == "texture_diffuse") {
-			number = std::to_string(diffuseNr++);
-		}
-		else if (name == "texture_specular") {
-			number = std::to_string(specularNr++);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			shader->setInt("ourTexture", 0);
 		}
 		else if (name == "texture_normal") {
-			number = std::to_string(normalNr++);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			shader->setInt("normalMap", 1);
 		}
-		else if (name == "texture_height") {
-			number = std::to_string(heightNr++);
-		}
-		shader->setInt(("material." + name + number).c_str(), i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 
 	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
@@ -82,7 +70,8 @@ void Mesh::setupMesh() {
 	GLuint loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
 	GLuint loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
 	GLuint loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
-
+	GLuint loc4 = glGetAttribLocation(shaderProgramID, "vertex_tangent");
+	GLuint loc5 = glGetAttribLocation(shaderProgramID, "vertex_bitangent");
 	
 	glEnableVertexAttribArray(loc1);
 	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
@@ -92,6 +81,12 @@ void Mesh::setupMesh() {
 
 	glEnableVertexAttribArray (loc3);
 	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoords));
+
+	glEnableVertexAttribArray(loc4);
+	glVertexAttribPointer(loc4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+	glEnableVertexAttribArray(loc5);
+	glVertexAttribPointer(loc5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
 	std::cout << "Mesh setup" << "\n";

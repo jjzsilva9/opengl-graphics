@@ -3,16 +3,24 @@
 in vec3 vertex_position;
 in vec3 vertex_normal;
 in vec2 vertex_texture;
+in vec3 vertex_tangent;
+in vec3 vertex_bitangent;
 
 out vec3 eyeCoords, tnorm;
 out vec2 TexCoord;
 out mat4 view_matrix;
+out mat3 TBN;
 
 uniform mat4 view;
 uniform mat4 proj;
 uniform mat4 model;
 
 void main(){
+  // Calculate TBN matrix for normal mapping
+  vec3 T = normalize(vec3(model * vec4(vertex_tangent, 0.0)));
+  vec3 B = normalize(vec3(model * vec4(vertex_bitangent, 0.0)));
+  vec3 N = normalize(vec3(model * vec4(vertex_normal, 0.0)));
+  TBN = mat3(T, B, N);
 
   mat4 ModelViewMatrix = view * model;
   mat3 NormalMatrix =  mat3(ModelViewMatrix);
