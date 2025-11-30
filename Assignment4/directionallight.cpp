@@ -96,8 +96,8 @@ vec3 DirectionalLight::getLightColor(float time) {
 }
 
 vec3 DirectionalLight::getAmbientColor(float time) {
-	vec3 nightAmbient = vec3(0.05f, 0.05f, 0.1f);   // Very dark blue
-	vec3 dayAmbient = vec3(0.3f, 0.3f, 0.35f);      // Light gray/blue
+	vec3 nightAmbient = vec3(0.15f, 0.15f, 0.2f);   // Very dark blue
+	vec3 dayAmbient = vec3(0.5f, 0.5f, 0.6f);      // Light gray/blue
 
 	float angle = time * 2.0f * 3.14f;
 	float sunHeight = sin(angle);

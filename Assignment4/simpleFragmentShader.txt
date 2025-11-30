@@ -16,7 +16,7 @@ uniform vec3 Kd; // Diffuse
 uniform vec3 Ks; // Specular
 uniform vec3 Ka; // Ambient
 
-float specular_exponent = 10.0;
+float specular_exponent = 40.0;
 
 
 uniform sampler2D ourTexture;
@@ -34,9 +34,9 @@ void main(){
 	vec3 Id = Ld * Kd * max(dot(L, normal), 0.0);
 
 	// Specular Intensity
-	vec3 R = reflect(-L, normal);
 	vec3 V = normalize(TangentViewPos);
-	vec3 Is = Ls * Ks * pow(max(dot(R, V), 0.0), specular_exponent);
+	vec3 H = normalize(L + V);
+	vec3 Is = Ls * Ks * pow(max(dot(normal, H), 0.0), specular_exponent);
 
 	// Combine terms and multiply by the texture
 	gl_FragColor = vec4((Ia + Id + Is) * texture(ourTexture, TexCoord).rgb, 1.0);

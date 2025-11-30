@@ -238,7 +238,7 @@ void init()
 	griffins.push_back(Griffin(files, vec3(50, 30.0f, -70), 11.0f, 0.16f, shader));
 	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
 
-	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.2, 0.2, 0.2), shader->ID, true);
+	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.5, 0.5, 0.5), shader->ID, true);
 
 }
 
