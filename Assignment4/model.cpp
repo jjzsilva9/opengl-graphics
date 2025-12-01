@@ -157,6 +157,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		else {
 			textureMaterial.Ks = vec3(0.1f, 0.1f, 0.1f);
 		}
+		float shininess;
+		if (AI_SUCCESS == material->Get(AI_MATKEY_SHININESS, shininess)) {
+			textureMaterial.Ns = shininess;
+		}
+		else {
+			textureMaterial.Ns = 40.0f;
+		}
 		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		for (Texture& a : diffuseMaps) {
 			a.material = textureMaterial;

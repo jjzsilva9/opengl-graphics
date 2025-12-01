@@ -11,6 +11,7 @@ out mat4 view_matrix;
 out vec3 TangentLightPos;
 out vec3 TangentViewPos;
 out vec3 TangentFragPos;
+out vec3 ViewFragPos;
 
 uniform mat4 view;
 uniform mat4 proj;
@@ -24,6 +25,7 @@ void main(){
   
   // Position in view space
   vec3 eyeCoords = vec3(ModelViewMatrix * vec4(vertex_position,1.0));
+  ViewFragPos = eyeCoords;
 
   TexCoord = vertex_texture;
   view_matrix = view;

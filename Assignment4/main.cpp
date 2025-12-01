@@ -34,6 +34,7 @@ namespace std {
 #include "griffin.h"
 #include "PerlinNoise.h"
 #include "directionallight.h"
+#include "fog.h"
 
 #define CAMERASPEED 50.0f
 
@@ -65,6 +66,7 @@ Shader* shader = nullptr;
 Model* terrain = nullptr;
 std::vector<Griffin> griffins;
 DirectionalLight* lightSource = nullptr;
+Fog* fog = nullptr;
 
 #pragma region INPUT_FUNCTIONS
 
@@ -223,6 +225,7 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
+	shader->use();
 	terrain = new Model("terrain_with_textures.obj", vec3(0, 0, 0), shader);
 	std::cout << "Griffin Model:" << "\n";
 
@@ -239,7 +242,7 @@ void init()
 	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
 
 	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.5, 0.5, 0.5), shader->ID, true);
-
+	fog = new Fog(vec4(0.7f, 0.75f, 0.8f, 1.0f), 100.0f, 10.0f, LINEAR, shader->ID);
 }
 
 

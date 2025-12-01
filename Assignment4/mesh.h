@@ -23,6 +23,7 @@ struct Material {
 	vec3 Kd; // Diffuse
 	vec3 Ks; // Specular
 	vec3 Ka; // Ambient
+	float Ns; // Specular Exponent
 };
 
 struct Texture {
