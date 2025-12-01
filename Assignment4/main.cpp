@@ -250,15 +250,15 @@ void renderGUI() {
 		if (ImGui::CollapsingHeader("Time of Day", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Checkbox("Day/Night Cycle##Light", &lightSource->dayCycle);
 			if (!lightSource->dayCycle) {
-				ImGui::SliderFloat("Time", &lightSource->timeOfDay, 0.0f, 1.0f);
+				ImGui::DragFloat("Time", &lightSource->timeOfDay, 0.001f, 0.0f, 1.0f);
 			}
 		}
 
 		if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen)) {
 			bool changed = false;
 			changed |= ImGui::Checkbox("Fog Enabled", &fog->enabled);
-			changed |= ImGui::SliderFloat("Max Dist", &fog->maxdist, 50.0f, 500.0f);
-			changed |= ImGui::SliderFloat("Min Dist", &fog->mindist, 0.0f, fog->maxdist - 5.0f);
+			changed |= ImGui::DragFloat("Max Dist", &fog->maxdist, 1.0f, 50.0f, 500.0f);
+			changed |= ImGui::DragFloat("Min Dist", &fog->mindist, 1.0f, 0.0f, fog->maxdist - 5.0f);
 			int type = (int)fog->factor;
 			if (ImGui::Combo("Type", &type, "Linear\0Exponential\0Exp Squared\0")) {
 				fog->factor = (FogFactor)type;
@@ -268,7 +268,7 @@ void renderGUI() {
 		}
 
 		if (ImGui::CollapsingHeader("Normal Map")) {
-			ImGui::SliderFloat("Intensity", &normalMapIntensity, 0.0f, 1000.0f);
+			ImGui::DragFloat("Intensity", &normalMapIntensity, 1.0f, 0.0f, 1000.0f);
 		}
 
 		if (ImGui::CollapsingHeader("Materials")) {
@@ -277,7 +277,7 @@ void renderGUI() {
 				changed |= ImGui::ColorEdit3("Kd##T", terrain->meshes[0].textures[0].material.Kd.v);
 				changed |= ImGui::ColorEdit3("Ks##T", terrain->meshes[0].textures[0].material.Ks.v);
 				changed |= ImGui::ColorEdit3("Ka##T", terrain->meshes[0].textures[0].material.Ka.v);
-				changed |= ImGui::SliderFloat("Ns##T", &terrain->meshes[0].textures[0].material.Ns, 1.0f, 1000.0f);
+				changed |= ImGui::DragFloat("Ns##T", &terrain->meshes[0].textures[0].material.Ns, 1.0f, 1.0f, 1000.0f);
 				ImGui::TreePop();
 
 				//if (changed) terrain->changeMeshMaterials();
