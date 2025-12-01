@@ -42,13 +42,12 @@ void DirectionalLight::Update(float deltaTime) {
 		if (timeOfDay > 1.0f) {
 			timeOfDay -= 1.0f;
 		}
-
-		position = getLightPosition(timeOfDay);
-
-		diffuse = getLightColor(timeOfDay);
-		specular = getLightColor(timeOfDay);
-		ambient = getAmbientColor(timeOfDay);
 	}
+	position = getLightPosition(timeOfDay);
+
+	diffuse = getLightColor(timeOfDay);
+	specular = getLightColor(timeOfDay);
+	ambient = getAmbientColor(timeOfDay);
 }
 
 vec3 DirectionalLight::getLightColor(float time) {

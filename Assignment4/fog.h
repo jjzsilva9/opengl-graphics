@@ -8,6 +8,7 @@
 // Project includes - needed for definitions
 #include "maths_funcs.h"
 #include "shader.h"
+#include "directionallight.h"
 
 enum FogFactor {
 	LINEAR,
@@ -20,15 +21,13 @@ public:
 	float maxdist;
 	float mindist;
 	FogFactor factor;
-	bool dayCycle;
+	DirectionalLight* lightSource;
 	GLuint shaderProgramID;
 	bool enabled;
 
-	Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle = false, bool enabled = true);
-	void Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle, bool enabled);
-	void Draw(float deltaTime);
+	Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, DirectionalLight* lightSource, bool enabled = true);
+	void Update();
+	void Draw();
 private:
-	float timeOfDay;
-	float cycleDuration;
 	vec4 getFogColor(float time);
 };

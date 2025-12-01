@@ -9,23 +9,20 @@
 #include "maths_funcs.h"
 #include "shader.h"
 #include "fog.h"
+#include "directionallight.h"
 
-Fog::Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle, bool enabled) {
+Fog::Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, DirectionalLight* lightSource, bool enabled) {
 	this->shaderProgramID = shaderProgramID;
-	this->timeOfDay = 0.5f;
-	this->cycleDuration = 60.0f;
-	this->Update(color, maxdist, mindist, factor, dayCycle, enabled);
-}
-
-void Fog::Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle, bool enabled) {
 	this->color = color;
 	this->maxdist = maxdist;
 	this->mindist = mindist;
 	this->factor = factor;
-	this->dayCycle = dayCycle;
+	this->lightSource = lightSource;
 	this->enabled = enabled;
-	
+	this->Update();
+}
 
+void Fog::Update() {
 	int color_location = glGetUniformLocation(shaderProgramID, "fog_color");
 	glUniform4fv(color_location, 1, color.v);
 
@@ -42,15 +39,9 @@ void Fog::Update(vec4 color, float maxdist, float mindist, FogFactor factor, boo
 	glUniform1i(enabled_location, enabled);
 }
 
-void Fog::Draw(float deltaTime) {
-	if (dayCycle) {
-		timeOfDay += deltaTime / cycleDuration;
-		if (timeOfDay > 1.0f) {
-			timeOfDay -= 1.0f;
-		}
+void Fog::Draw() {
 
-		color = getFogColor(timeOfDay);
-	}
+	color = getFogColor(lightSource->timeOfDay);
 
 	int color_location = glGetUniformLocation(shaderProgramID, "fog_color");
 	glUniform4fv(color_location, 1, color.v);

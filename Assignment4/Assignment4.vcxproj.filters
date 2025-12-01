@@ -57,6 +57,9 @@
     <ClCompile Include="imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="maths_funcs.h">
@@ -113,6 +116,9 @@
     <ClInclude Include="imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="simpleFragmentShader.txt">
@@ -121,6 +127,8 @@
     <Text Include="simpleVertexShader.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="skyboxVertexShader.txt" />
+    <Text Include="skyboxFragmentShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="griffin.dae">

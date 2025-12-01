@@ -35,6 +35,7 @@ namespace std {
 #include "PerlinNoise.h"
 #include "directionallight.h"
 #include "fog.h"
+#include "skybox.h"
 
 #include "imgui.h"
 #include "imgui_impl_glut.h"
@@ -67,10 +68,12 @@ int lastY = height / 2;
 bool firstMouse = true;
 
 Shader* shader = nullptr;
+Shader* skyboxShader = nullptr;
 Model* terrain = nullptr;
 std::vector<Griffin> griffins;
 DirectionalLight* lightSource = nullptr;
 Fog* fog = nullptr;
+Skybox* skybox = nullptr;
 
 bool showGUI = false;
 float normalMapIntensity = 1.0f;
@@ -247,7 +250,7 @@ void renderGUI() {
 		if (ImGui::CollapsingHeader("Time of Day", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Checkbox("Day/Night Cycle##Light", &lightSource->dayCycle);
 			if (!lightSource->dayCycle) {
-				ImGui::SliderFloat("Time of Day", &lightSource->timeOfDay, -1.0f, 1.0f);
+				ImGui::SliderFloat("Time", &lightSource->timeOfDay, 0.0f, 1.0f);
 			}
 		}
 
@@ -261,7 +264,7 @@ void renderGUI() {
 				fog->factor = (FogFactor)type;
 				changed = true;
 			}
-			if (changed) fog->Update(fog->color, fog->maxdist, fog->mindist, fog->factor, fog->dayCycle, fog->enabled);
+			if (changed) fog->Update();
 		}
 
 		if (ImGui::CollapsingHeader("Normal Map")) {
@@ -289,28 +292,45 @@ void renderGUI() {
 }
 
 void display() {
-
-	// tell GL to only draw onto a pixel if the shape is closer to the viewer
-	glEnable(GL_DEPTH_TEST); // enable depth-testing
-	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
+	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glDepthFunc(GL_LEQUAL);
+	skyboxShader->use();
+	
+	mat4 skyboxView = view;
+	skyboxView.m[12] = skyboxView.m[13] = skyboxView.m[14] = 0.0f;
+	
+	int view_mat_location = glGetUniformLocation(skyboxShader->ID, "view");
+	int proj_mat_location = glGetUniformLocation(skyboxShader->ID, "projection");
+	int skybox_location = glGetUniformLocation(skyboxShader->ID, "skybox");
+	int time_location = glGetUniformLocation(skyboxShader->ID, "timeOfDay");
+
+	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
+	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, skyboxView.m);
+	glUniform1i(skybox_location, 0);
+	glUniform1f(time_location, lightSource->timeOfDay);
+
+	glBindVertexArray(skybox->VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->textureID);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glDepthFunc(GL_LESS);
 	shader->use();
 
-	//Declare your uniform variables that will be used in your shader
-	int view_mat_location = glGetUniformLocation(shader->ID, "view");
-	int proj_mat_location = glGetUniformLocation(shader->ID, "proj");
+	view_mat_location = glGetUniformLocation(shader->ID, "view");
+	proj_mat_location = glGetUniformLocation(shader->ID, "proj");
 
-	// update uniforms & draw
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
+	glUniform1f(glGetUniformLocation(shader->ID, "normalMapIntensity"), normalMapIntensity);
 
 	lightSource->Draw(delta);
-	fog->Draw(delta);
+	fog->Draw();
 
 	terrain->Draw();
-	
 	
 	for (unsigned int i = 0; i < griffins.size(); i++) {
 		griffins[i].Draw(delta);
@@ -340,7 +360,8 @@ void updateScene() {
 void init()
 {
 	shader = new Shader("simpleVertexShader.txt", "simpleFragmentShader.txt");
-	shader->use();
+	skyboxShader = new Shader("skyboxVertexShader.txt", "skyboxFragmentShader.txt");
+	
 	terrain = new Model("terrain_with_textures.obj", vec3(0, 0, 0), shader);
 	std::cout << "Griffin Model:" << "\n";
 
@@ -357,7 +378,17 @@ void init()
 	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
 
 	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.5, 0.5, 0.5), shader->ID, true);
-	fog = new Fog(vec4(0.7f, 0.75f, 0.8f, 0.3f), 350.0f, 75.0f, EXPONENTIAL_SQUARED, shader->ID, true, false);
+	fog = new Fog(vec4(0.7f, 0.75f, 0.8f, 0.3f), 350.0f, 75.0f, EXPONENTIAL_SQUARED, shader->ID, lightSource, false);
+
+	std::vector<std::string> faces = { 
+		"textures/cubemaps/px.png",  // Right  (+X)
+		"textures/cubemaps/nx.png",// Left   (-X)
+		"textures/cubemaps/py.png",  // Top    (+Y)
+		"textures/cubemaps/ny.png",  // Bottom (-Y)
+		"textures/cubemaps/pz.png",  // Front  (+Z)
+		"textures/cubemaps/nz.png"   // Back   (-Z)
+	};
+	skybox = new Skybox(faces);
 }
 
 void cleanup() {
