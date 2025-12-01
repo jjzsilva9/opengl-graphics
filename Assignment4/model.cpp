@@ -46,6 +46,25 @@ void Model::Draw() {
 	}
 }
 
+void Model::changeMeshMaterials() {
+	for (int i = 0; i < meshes.size(); i++) {
+		for (int j = 0; j < meshes[i].textures.size(); j++) {
+			if (length(material.Ka) != 0) {
+				meshes[i].textures[j].material.Ka = material.Ka;
+			}
+			if (length(material.Kd) != 0) {
+				meshes[i].textures[j].material.Kd = material.Kd;
+			}
+			if (length(material.Ks) != 0) {
+				meshes[i].textures[j].material.Ks = material.Ks;
+			}
+			if (material.Ns != 0) {
+				meshes[i].textures[j].material.Ns = material.Ns;
+			}
+		}
+	}
+}
+
 void Model::translate(vec3 offset) {
 	model = ::translate(model, offset);
 }

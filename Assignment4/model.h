@@ -25,14 +25,16 @@ class Model {
 public:
 	mat4 model;
 	Material material;
+	std::vector<Mesh> meshes;
 
 	Model(const char* path, vec3 position, Shader* shader);
 	void Draw();
 	void translate(vec3 offset);
 	void rotate(vec3 offset);
+	void changeMeshMaterials();
 
 private:
-	std::vector<Mesh> meshes;
+	
 	std::string directory;
 	static std::vector<Texture> textures_loaded;
 	GLuint shaderProgramID;

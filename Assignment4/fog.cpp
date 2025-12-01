@@ -10,19 +10,20 @@
 #include "shader.h"
 #include "fog.h"
 
-Fog::Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle) {
+Fog::Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle, bool enabled) {
 	this->shaderProgramID = shaderProgramID;
 	this->timeOfDay = 0.5f;
 	this->cycleDuration = 60.0f;
-	this->Update(color, maxdist, mindist, factor, dayCycle);
+	this->Update(color, maxdist, mindist, factor, dayCycle, enabled);
 }
 
-void Fog::Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle) {
+void Fog::Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle, bool enabled) {
 	this->color = color;
 	this->maxdist = maxdist;
 	this->mindist = mindist;
 	this->factor = factor;
 	this->dayCycle = dayCycle;
+	this->enabled = enabled;
 	
 
 	int color_location = glGetUniformLocation(shaderProgramID, "fog_color");
@@ -36,6 +37,9 @@ void Fog::Update(vec4 color, float maxdist, float mindist, FogFactor factor, boo
 
 	int factor_location = glGetUniformLocation(shaderProgramID, "fog_factor");
 	glUniform1i(factor_location, factor);
+
+	int enabled_location = glGetUniformLocation(shaderProgramID, "fog_enabled");
+	glUniform1i(enabled_location, enabled);
 }
 
 void Fog::Draw(float deltaTime) {

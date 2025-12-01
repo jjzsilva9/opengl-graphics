@@ -17,12 +17,14 @@ uniform vec3 Kd; // Diffuse
 uniform vec3 Ks; // Specular
 uniform vec3 Ka; // Ambient
 uniform float Ns; // Specular Exponent
+uniform float normalMapIntensity;
 
 // Fog Properties
 uniform float fog_maxdist;
 uniform float fog_mindist;
 uniform vec4 fog_color;
 uniform int fog_factor;
+uniform bool fog_enabled;
 
 uniform sampler2D ourTexture;
 uniform sampler2D normalMap;
@@ -43,17 +45,21 @@ void main(){
 	vec3 H = normalize(L + V);
 	vec3 Is = Ls * Ks * pow(max(dot(normal, H), 0.0), Ns);
 
-	float dist = length(ViewFragPos);
-	float factor;
-	if (fog_factor == 0) {
-		factor = (fog_maxdist - dist) / (fog_maxdist - fog_mindist);
-	} else if (fog_factor == 1) {
-		factor = exp(-1.0 * dist);
-	} else if (fog_factor == 2) {
-		factor = pow(exp(-1.0 * dist), 2);
+	if (fog_enabled) {
+		float dist = length(ViewFragPos);
+		float factor;
+		if (fog_factor == 0) {
+			factor = (fog_maxdist - dist) / (fog_maxdist - fog_mindist);
+		} else if (fog_factor == 1) {
+			factor = exp(-1.0/fog_maxdist * dist);
+		} else if (fog_factor == 2) {
+			factor = pow(exp(-1.0/fog_maxdist * dist), 2);
+		}
+		factor = clamp(factor, 0.3, 1.0);
+		// Combine terms and multiply by the texture
+		gl_FragColor = mix(fog_color, vec4((Ia + Id + Is) * texture(ourTexture, TexCoord).rgb, 1.0), factor);
+	} else {
+		gl_FragColor = vec4((Ia + Id + Is) * texture(ourTexture, TexCoord).rgb, 1.0);
 	}
-	factor = clamp(factor, 0.0, 1.0);
-	//factor = 1.0;
-	// Combine terms and multiply by the texture
-	gl_FragColor = mix(fog_color, vec4((Ia + Id + Is) * texture(ourTexture, TexCoord).rgb, 1.0), factor);
+	
 }

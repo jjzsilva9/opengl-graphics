@@ -36,6 +36,10 @@ namespace std {
 #include "directionallight.h"
 #include "fog.h"
 
+#include "imgui.h"
+#include "imgui_impl_glut.h"
+#include "imgui_impl_opengl3.h"
+
 #define CAMERASPEED 50.0f
 
 
@@ -68,9 +72,28 @@ std::vector<Griffin> griffins;
 DirectionalLight* lightSource = nullptr;
 Fog* fog = nullptr;
 
+bool showGUI = false;
+float normalMapIntensity = 1.0f;
+
 #pragma region INPUT_FUNCTIONS
 
 void keypress(unsigned char key, int x, int y) {
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (key == 'g') {
+		showGUI = !showGUI;
+		if (showGUI) {
+			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+		}
+		else {
+			glutSetCursor(GLUT_CURSOR_NONE);
+		}
+		return;
+	}
+	io.AddInputCharacter(key);
+	if (io.WantCaptureKeyboard) {
+		return;
+	}
 	// ESC Key to quit
 	if (key == 27) {
 		glutLeaveMainLoop();
@@ -102,7 +125,16 @@ void keypress(unsigned char key, int x, int y) {
 
 
 void mouse(int x, int y) {
+	ImGuiIO& io = ImGui::GetIO();
 
+	
+	io.MousePos = ImVec2((float)x, (float)y);
+	if (io.WantCaptureMouse) {
+		return;
+	}
+	if (showGUI) {
+		return;
+	}
 	// If the mouse has just entered the window
 	// Set lastX and lastY to the current x and y
 	if (firstMouse) {
@@ -145,16 +177,38 @@ void mouse(int x, int y) {
 	}
 }
 
-//void mouseEnter(int state) {
-//	firstMouse = true;
-//	glutWarpPointer(width / 2, height / 2);
-//}
+void mouseClick(int button, int state, int x, int y) {
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (button == GLUT_LEFT_BUTTON) {
+		io.MouseDown[0] = (state == GLUT_DOWN);
+	}
+	else if (button == GLUT_RIGHT_BUTTON) {
+		io.MouseDown[1] = (state == GLUT_DOWN);
+	}
+	else if (button == GLUT_MIDDLE_BUTTON) {
+		io.MouseDown[2] = (state == GLUT_DOWN);
+	}
+}
+
+void mouseDrag(int x, int y) {
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.MousePos = ImVec2((float)x, (float)y);
+
+	if (io.WantCaptureMouse || showGUI) {
+		return;
+	}
+}
 
 void reshape(int x, int y) {
 	width = x;
 	height = y;
 	glViewport(0, 0, x, y);
 	persp_proj = perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2((float)width, (float)height);
 }
 
 #pragma endregion INPUT_FUNCTIONS
@@ -176,6 +230,63 @@ void reshape(int x, int y) {
 //}
 #pragma endregion TERRAIN
 
+void renderGUI() {
+	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2((float)width, (float)height);
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGLUT_NewFrame();
+	ImGui::NewFrame();
+
+	if (showGUI) {
+		float windowWidth = 450.0f;
+		ImGui::SetNextWindowSize(ImVec2(windowWidth, 650), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(width - windowWidth - 10, 10), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Scene Settings", &showGUI);
+
+		if (ImGui::CollapsingHeader("Time of Day", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Checkbox("Day/Night Cycle##Light", &lightSource->dayCycle);
+			if (!lightSource->dayCycle) {
+				ImGui::SliderFloat("Time of Day", &lightSource->timeOfDay, -1.0f, 1.0f);
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen)) {
+			bool changed = false;
+			changed |= ImGui::Checkbox("Fog Enabled", &fog->enabled);
+			changed |= ImGui::SliderFloat("Max Dist", &fog->maxdist, 50.0f, 500.0f);
+			changed |= ImGui::SliderFloat("Min Dist", &fog->mindist, 0.0f, fog->maxdist - 5.0f);
+			int type = (int)fog->factor;
+			if (ImGui::Combo("Type", &type, "Linear\0Exponential\0Exp Squared\0")) {
+				fog->factor = (FogFactor)type;
+				changed = true;
+			}
+			if (changed) fog->Update(fog->color, fog->maxdist, fog->mindist, fog->factor, fog->dayCycle, fog->enabled);
+		}
+
+		if (ImGui::CollapsingHeader("Normal Map")) {
+			ImGui::SliderFloat("Intensity", &normalMapIntensity, 0.0f, 1000.0f);
+		}
+
+		if (ImGui::CollapsingHeader("Materials")) {
+			if (ImGui::TreeNode("Terrain")) {
+				bool changed = false;
+				changed |= ImGui::ColorEdit3("Kd##T", terrain->meshes[0].textures[0].material.Kd.v);
+				changed |= ImGui::ColorEdit3("Ks##T", terrain->meshes[0].textures[0].material.Ks.v);
+				changed |= ImGui::ColorEdit3("Ka##T", terrain->meshes[0].textures[0].material.Ka.v);
+				changed |= ImGui::SliderFloat("Ns##T", &terrain->meshes[0].textures[0].material.Ns, 1.0f, 1000.0f);
+				ImGui::TreePop();
+
+				//if (changed) terrain->changeMeshMaterials();
+			}
+		}
+
+		ImGui::End();
+	}
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
 
 void display() {
 
@@ -196,12 +307,16 @@ void display() {
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 
 	lightSource->Draw(delta);
+	fog->Draw(delta);
 
 	terrain->Draw();
+	
 	
 	for (unsigned int i = 0; i < griffins.size(); i++) {
 		griffins[i].Draw(delta);
 	}
+
+	renderGUI();
 	glutSwapBuffers();
 }
 
@@ -242,10 +357,19 @@ void init()
 	griffins.push_back(Griffin(files, vec3(-60, 28.0f, -55), 8.0f, 0.14f, shader));
 
 	lightSource = new DirectionalLight(vec4(10.0, 10.0, 4.0, 1.0), vec3(0.7, 0.7, 0.7), vec3(1.0, 1.0, 1.0), vec3(0.5, 0.5, 0.5), shader->ID, true);
-	fog = new Fog(vec4(0.7f, 0.75f, 0.8f, 1.0f), 100.0f, 10.0f, LINEAR, shader->ID);
+	fog = new Fog(vec4(0.7f, 0.75f, 0.8f, 0.3f), 350.0f, 75.0f, EXPONENTIAL_SQUARED, shader->ID, true, false);
 }
 
+void cleanup() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGLUT_Shutdown();
+	ImGui::DestroyContext();
 
+	delete shader;
+	delete terrain;
+	delete lightSource;
+	delete fog;
+}
 
 int main(int argc, char** argv) {
 
@@ -259,6 +383,8 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutIdleFunc(updateScene);
 	glutKeyboardFunc(keypress);
+	glutMouseFunc(mouseClick);
+	glutMotionFunc(mouseDrag);
 	glutSetCursor(GLUT_CURSOR_NONE);
 	glutPassiveMotionFunc(mouse);
 	glutReshapeFunc(reshape);
@@ -270,10 +396,21 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
 		return 1;
 	}
+
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGLUT_Init();
+	ImGui_ImplOpenGL3_Init("#version 330");
+
 	// Set up your objects and shaders
 	init();
+	atexit(cleanup);
 	glutFullScreen();
 	// Begin infinite event loop
 	glutMainLoop();
 	return 0;
 }
+

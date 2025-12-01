@@ -22,9 +22,10 @@ public:
 	FogFactor factor;
 	bool dayCycle;
 	GLuint shaderProgramID;
+	bool enabled;
 
-	Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle = false);
-	void Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle);
+	Fog(vec4 color, float maxdist, float mindist, FogFactor factor, GLuint shaderProgramID, bool dayCycle = false, bool enabled = true);
+	void Update(vec4 color, float maxdist, float mindist, FogFactor factor, bool dayCycle, bool enabled);
 	void Draw(float deltaTime);
 private:
 	float timeOfDay;

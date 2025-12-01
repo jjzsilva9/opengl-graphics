@@ -16,13 +16,14 @@ public:
 	vec3 specular;
 	vec3 ambient;
 	bool dayCycle;
+	float timeOfDay;
 	GLuint shaderProgramID;
 
 	DirectionalLight(vec4 position, vec3 diffuse, vec3 specular, vec3 ambient, GLuint shaderProgramID, bool dayCycle = false);
 	void Draw(float deltaTime);
 	
 private:
-	float timeOfDay;
+	
 	float cycleDuration;
 	void Update(float deltaTime);
 	vec3 getLightColor(float time);
