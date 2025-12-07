@@ -46,4 +46,20 @@ The camera implements WASD movement with Q/E for vertical adjustment and mouse�
 
 ## Assets and References
 
-Models and skybox assets are sourced from Sketchfab and Freestylized. The project uses Assimp, Dear ImGui, and stb_image, with reference to LearnOpenGL tutorials and course notes on fog and texturing.
+### Tutorials
+- **LearnOpenGL – Normal Mapping:** https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+- **LearnOpenGL – Cubemaps:** https://learnopengl.com/Advanced-OpenGL/Cubemaps
+- **Fog – Notes from Iain Martin's Computer Graphics module:**  
+  https://opengl-notes.readthedocs.io/en/latest/topics/texturing/aliasing.html
+
+### Models / Assets
+- **Snowy Mountain:** https://skfb.ly/oEYOw
+- **Griffin:** https://skfb.ly/oG8py
+- **Nest:** https://skfb.ly/6CUxK
+- **Rocks:** https://skfb.ly/opCKY
+- **Skybox:** https://freestylized.com/skybox/sky_39/
+
+### Libraries
+- **Assimp Documentation:** http://assimp.org/
+- **Dear ImGui:** https://github.com/ocornut/imgui
+- **stb_image:** https://github.com/nothings/stb
