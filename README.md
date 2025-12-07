@@ -1,7 +1,8 @@
-# Real‑Time Mountain Scene with Animated Griffins
+# Mountain Scene
 
 The final project code is included in the Assignment 4 Folder
 
+This project was implemented as the individual OpenGL project for CS7GV6, the Computer Graphics module at Trinity College Dublin.
 ![Overview](media/overview.png)
 This project implements a mountainous scene featuring animated griffins. The scene uses Blinn‑Phong shading with tangent‑space normal mapping, and a day‑night cycle system for directional lighting sets the colour and position of the light, as well as the colour of the fog and the skybox. A GUI is included to allow the changing of various parameters live in the scene.
 
