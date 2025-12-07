@@ -1,5 +1,7 @@
 # Real‑Time Mountain Scene with Animated Griffins
 
+The final project code is included in the Assignment 4 Folder
+
 This project implements a mountainous scene featuring animated griffins. The scene uses Blinn‑Phong shading with tangent‑space normal mapping, and a day‑night cycle system for directional lighting sets the colour and position of the light, as well as the colour of the fog and the skybox. A GUI is included to allow the changing of various parameters live in the scene.
 
 Demo video: **https://www.youtube.com/watch?v=HNvmNoOzFQk**
